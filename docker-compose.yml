@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:17.2
+    container_name: db
+    networks:
+      - main
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file:
+      - ./postgres.env
+    ports:
+      - "5432:5432"
+    restart: always
+
+  user_management:
+    build:
+      context: ./services/user_management
+      dockerfile: Dockerfile
+    image: user_management:1.0  
+    container_name: user_management
+    volumes:
+      - static:/app/static
+      - media:/app/media
+    networks:
+      - main
+    depends_on:
+      - db
+    env_file:
+      - ./services/user_management/.env
+    ports:
+      - "8001:8000"
+    restart: always
+
+  nginx:
+    image: nginx:1.27.3
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static:/var/www/static
+      - media:/var/www/media
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf
+    networks:
+      - main
+    depends_on:
+      - db
+    restart: always
+
+volumes:
+  postgres_data:
+  static:
+  media:
+
+
+networks:
+  main:

@@ -1,0 +1,3 @@
+# Event management system
+
+This repository is currently under **development**. It is intended to be an event management system app with a microservice architecture, utilizing external services such as Redis, Postgres, Nginx, and...
