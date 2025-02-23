@@ -9,6 +9,10 @@ __pycache__/
 *.py[cod]
 *.pyo
 
+# static and media files
+/app/static
+/app/media
+
 # Virtual environment
 venv/
 env/

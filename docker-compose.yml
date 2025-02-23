@@ -18,9 +18,10 @@ services:
     build:
       context: ./services/user_management
       dockerfile: Dockerfile
-    image: user_management:1.0  
+    image: user_management:1.0
     container_name: user_management
     volumes:
+      - ./services/user_management:/app/
       - static:/app/static
       - media:/app/media
     networks:

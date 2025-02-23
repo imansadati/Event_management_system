@@ -5,14 +5,14 @@ WORKDIR /app/
 
 COPY /requirements.txt /app/
 
+COPY . /app/
+
 RUN pip install -r /app/requirements.txt && \ 
     adduser --disabled-password --no-create-home app && \
-    mkdir -p /app/static /app/media && \
-    chown -R app:app /app/static /app/media
+    mkdir -p /app/static /app/media && \ 
+    chown -R app:app /app /app/static /app/media
 
-USER app 
-
-COPY . /app/
+USER app
 
 EXPOSE 8000
 
