@@ -49,3 +49,56 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         abstract = True
+
+
+class AdminUser(BaseUser):
+    profile = models.OneToOneField(
+        'Profile', on_delete=models.CASCADE, blank=True, null=True)
+    is_admin = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'admin'
+        verbose_name_plural = 'admins'
+
+    def __str__(self):
+        return self.full_name
+
+
+class AttendeeUser(BaseUser):
+    profile = models.OneToOneField(
+        'Profile', on_delete=models.CASCADE, null=True, blank=True)
+    membership_status = models.CharField(
+        max_length=16, choices=[('active', 'Active'), ('inactive', 'Inactive')], default='active')
+    is_attendee = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'attendee'
+        verbose_name_plural = 'attendees'
+
+    def __str__(self):
+        return self.full_name
+
+
+class StaffUser(BaseUser):
+    profile = models.OneToOneField('Profile', on_delete=models.CASCADE)
+    is_staff = models.BooleanField(default=True)
+    job_title = models.CharField(max_length=64)
+    availability_status = models.CharField(
+        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')])
+    work_experience = models.SmallIntegerField()
+
+    class Meta:
+        verbose_name = 'staff'
+        verbose_name_plural = 'staff'
+
+    def __str__(self):
+        return self.full_name
+
+
+class Profile(models.Model):
+    picture = models.ImageField(
+        upload_to='images/profile/', blank=True, null=True)
+    bio = models.TextField(null=True, blank=True)
+    date_of_birth = models.DateField()
+    gender = models.CharField(max_length=8, choices=[
+                              ('male', 'Male'), ('female', 'Female')])
