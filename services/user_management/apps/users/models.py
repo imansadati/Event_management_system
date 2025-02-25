@@ -96,9 +96,21 @@ class StaffUser(BaseUser):
 
 
 class Profile(models.Model):
+    address = models.OneToOneField(
+        'Address', on_delete=models.CASCADE, null=True, blank=True)
     picture = models.ImageField(
         upload_to='images/profile/', blank=True, null=True)
     bio = models.TextField(null=True, blank=True)
     date_of_birth = models.DateField()
     gender = models.CharField(max_length=8, choices=[
                               ('male', 'Male'), ('female', 'Female')])
+
+
+class Address(models.Model):
+    country = models.CharField(max_length=32)
+    province = models.CharField(max_length=64)
+    city = models.CharField(max_length=64)
+    full_address = models.TextField()
+    postal_code = models.CharField(max_length=16)
+    address_type = models.CharField(
+        max_length=16, choices=[('home', 'Home'), ('work', 'Work')])
