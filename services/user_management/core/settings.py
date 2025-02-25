@@ -21,11 +21,11 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 THIRD_PARTY_APPS = [
-
+    'rest_framework'
 ]
 
 LOCAL_APPS = [
-
+    'apps.users.apps.UsersConfig'
 ]
 
 INSTALLED_APPS = [
