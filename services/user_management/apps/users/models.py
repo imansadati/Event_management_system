@@ -25,6 +25,23 @@ class BaseUserManager(BUM):
         user.save(using=self._db)
         return user
 
+    def create_admin(self, email: str, password: str, full_name: str, **extra_fields):
+        extra_fields.setdefault('is_admin', True)
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        return self.create_user(full_name, email, password, **extra_fields)
+
+    def create_staff(self, email: str, password: str, full_name: str, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+
+        return self.create_user(full_name, email, password, **extra_fields)
+
+    def create_attendee(self, email: str, password: str, full_name: str, **extra_fields):
+        extra_fields.setdefault('is_attendee', True)
+
+        return self.create_user(full_name, email, password, **extra_fields)
+
 
 class BaseUser(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=128, unique=True, db_index=True)
