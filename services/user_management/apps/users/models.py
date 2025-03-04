@@ -64,6 +64,10 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     objects = BaseUserManager()
 
+    def save(self, *args, **kwargs):
+        self.set_password(self.password)
+        return super().save(*args, **kwargs)
+
     class Meta:
         abstract = True
 
