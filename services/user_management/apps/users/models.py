@@ -27,7 +27,6 @@ class BaseUserManager(BUM):
 
     def create_admin(self, email: str, password: str, full_name: str, **extra_fields):
         extra_fields.setdefault('is_admin', True)
-        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
         return self.create_user(full_name, email, password, **extra_fields)
