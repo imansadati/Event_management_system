@@ -19,8 +19,6 @@ class AdminUserListApi(APIView):
         username = serializers.CharField(max_length=128, required=False)
 
     class OutputAdminSerializer(serializers.ModelSerializer):
-        password = serializers.CharField(max_lenght=128)
-
         class Meta:
             model = AdminUser
             fields = '__all__'
