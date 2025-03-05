@@ -1,5 +1,5 @@
 import django_filters
-from .models import AdminUser, StaffUser
+from .models import AdminUser, StaffUser, AttendeeUser
 
 
 class AdminFilter(django_filters.FilterSet):
@@ -23,4 +23,16 @@ class StaffFilter(django_filters.FilterSet):
             'username': ['exact'],
             'full_name': ['iexact'],
             'is_staff': ['exact'],
+        }
+
+
+class AttendeeFilter(django_filters.FilterSet):
+    class Meta:
+        model = AttendeeUser
+        fields = {
+            'email': ['iexact'],
+            'membership_status': ['exact'],
+            'username': ['exact'],
+            'full_name': ['iexact'],
+            'is_attendee': ['exact'],
         }
