@@ -19,7 +19,7 @@ class BaseUserManager(BUM):
         if password is not None:
             user.set_password(password)
         else:
-            user.set_unusable_password(password)
+            user.set_unusable_password()
 
         user.full_clean()
         user.save(using=self._db)
@@ -27,7 +27,6 @@ class BaseUserManager(BUM):
 
     def create_admin(self, email: str, password: str, full_name: str, **extra_fields):
         extra_fields.setdefault('is_admin', True)
-        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
         return self.create_user(full_name, email, password, **extra_fields)
@@ -63,6 +62,10 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
 
     objects = BaseUserManager()
+
+    def save(self, *args, **kwargs):
+        self.set_password(self.password)
+        return super().save(*args, **kwargs)
 
     class Meta:
         abstract = True
