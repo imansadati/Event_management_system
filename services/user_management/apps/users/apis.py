@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework import serializers, status
 from .models import AdminUser, StaffUser, AttendeeUser
 from django.http import HttpRequest, Http404
-from .selectors import user_admin_list, user_staff_list, user_attendee_list, user_admin_get, user_staff_get
+from .selectors import user_admin_list, user_staff_list, user_attendee_list, user_admin_get, user_staff_get, user_attendee_get
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
 from rest_framework.response import Response
@@ -136,5 +136,22 @@ class StaffUserDetailApi(APIView):
             raise Http404
 
         data = self.OutputStaffSerializer(user).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class AttendeeUserDetailApi(APIView):
+    class OutputAttendeeSerializer(serializers.Serializer):
+        id = serializers.IntegerField()
+        username = serializers.CharField(max_length=128)
+        email = serializers.EmailField()
+
+    def get(self, request: HttpRequest, user_id):
+        user = user_attendee_get(user_id)
+
+        if user is None:
+            raise Http404
+
+        data = self.OutputAttendeeSerializer(user).data
 
         return Response(data, status=status.HTTP_200_OK)
