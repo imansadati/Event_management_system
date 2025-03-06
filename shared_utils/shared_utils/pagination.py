@@ -1,6 +1,7 @@
 from rest_framework.pagination import LimitOffsetPagination as _LimitOffsetPagination
 from rest_framework.response import Response
 from collections import OrderedDict
+from rest_framework import status
 
 
 def get_paginated_response(*, pagination_class, serializer_class, queryset, request, view):
@@ -12,9 +13,9 @@ def get_paginated_response(*, pagination_class, serializer_class, queryset, requ
         serializer = serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    serializer = serializer_class(queryset, many=True) 
+    serializer = serializer_class(queryset, many=True)
 
-    return Response(data=serializer.data)
+    return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class LimitOffsetPagination(_LimitOffsetPagination):
