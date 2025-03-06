@@ -30,3 +30,10 @@ def user_admin_get(user_id):
         return get_object_or_404(AdminUser, id=user_id)
     except Http404:
         return None
+
+
+def user_staff_get(user_id):
+    try:
+        return get_object_or_404(StaffUser, id=user_id)
+    except Http404:
+        return None
