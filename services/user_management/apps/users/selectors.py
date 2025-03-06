@@ -1,5 +1,7 @@
 from .models import AdminUser, StaffUser, AttendeeUser
 from .filters import AdminFilter, StaffFilter, AttendeeFilter
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 
 
 def user_admin_list(*, filters):
@@ -21,3 +23,10 @@ def user_attendee_list(*, filters):
 
     qs = AttendeeUser.objects.all()
     return AttendeeFilter(filters, qs).qs
+
+
+def user_admin_get(user_id):
+    try:
+        return get_object_or_404(AdminUser, id=user_id)
+    except Http404:
+        return None
