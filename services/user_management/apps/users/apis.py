@@ -112,6 +112,7 @@ class AdminUserDetailApi(APIView):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
         email = serializers.EmailField()
+        is_admin = serializers.BooleanField()
 
     def get(self, request: HttpRequest, user_id):
         user = user_admin_get(user_id)
@@ -129,6 +130,7 @@ class StaffUserDetailApi(APIView):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
         email = serializers.EmailField()
+        is_staff = serializers.BooleanField()
 
     def get(self, request: HttpRequest, user_id):
         user = user_staff_get(user_id)
@@ -146,6 +148,7 @@ class AttendeeUserDetailApi(APIView):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
         email = serializers.EmailField()
+        is_attendee = serializers.BooleanField()
 
     def get(self, request: HttpRequest, user_id):
         user = user_attendee_get(user_id)
