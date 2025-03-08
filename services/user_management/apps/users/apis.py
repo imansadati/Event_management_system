@@ -6,7 +6,7 @@ from .selectors import user_admin_list, user_staff_list, user_attendee_list, use
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
 from rest_framework.response import Response
-from .services import user_admin_create, user_staff_create
+from .services import user_admin_create, user_staff_create, user_attendee_create
 
 
 class AdminUserListApi(APIView):
@@ -191,4 +191,21 @@ class StaffUserCreateApi(APIView):
         user = user_staff_create(**serializer.validated_data)
 
         data = StaffUserDetailApi.OutputStaffSerializer(user).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+class AttendeeUserCreateApi(APIView):
+    class InputAttendeeSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+        password = serializers.CharField(max_length=128)
+        full_name = serializers.CharField(max_length=128)
+        username = serializers.CharField(max_length=128)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputAttendeeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = user_attendee_create(**serializer.validated_data)
+
+        data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
