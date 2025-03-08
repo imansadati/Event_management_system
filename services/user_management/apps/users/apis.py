@@ -6,11 +6,12 @@ from .selectors import user_admin_list, user_staff_list, user_attendee_list, use
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
 from rest_framework.response import Response
+from .services import user_admin_create
 
 
 class AdminUserListApi(APIView):
     class Pagination(LimitOffsetPagination):
-        default_limit = 2
+        default_limit = 5
 
     class FilterSerializer(serializers.Serializer):
         email = serializers.EmailField(required=False)
@@ -155,3 +156,20 @@ class AttendeeUserDetailApi(APIView):
         data = self.OutputAttendeeSerializer(user).data
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class AdminUserCreateApi(APIView):
+    class InputAdminSerializer(serializers.Serializer):
+        email = serializers.EmailField()
+        password = serializers.CharField(max_length=128)
+        full_name = serializers.CharField(max_length=128)
+        username = serializers.CharField(max_length=128)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputAdminSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = user_admin_create(**serializer.validated_data)
+
+        data = AdminUserDetailApi.OutputAdminSerializer(user).data
+        return Response(data, status=status.HTTP_201_CREATED)
