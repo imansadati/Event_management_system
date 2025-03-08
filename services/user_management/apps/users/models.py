@@ -100,11 +100,12 @@ class AttendeeUser(BaseUser):
 
 
 class StaffUser(BaseUser):
-    profile = models.OneToOneField('Profile', on_delete=models.CASCADE)
+    profile = models.OneToOneField(
+        'Profile', on_delete=models.CASCADE, null=True, blank=True)
     is_staff = models.BooleanField(default=True)
     job_title = models.CharField(max_length=64)
     availability_status = models.CharField(
-        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')])
+        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], null=True, blank=True)
     work_experience = models.SmallIntegerField()
 
     class Meta:
