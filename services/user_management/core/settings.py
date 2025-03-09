@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import shared_utils
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -117,3 +118,8 @@ MEDIA_ROOT = '/app/media'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
+}
