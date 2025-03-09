@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="shared-utils-ems",
-    version="1.0.2",
+    version="2.5.0",
     packages=find_packages(),
     install_requires=[],  
     description="A shared utility library for event management system based on microservices architecture.",
