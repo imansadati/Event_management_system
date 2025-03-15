@@ -47,6 +47,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=128, db_index=True)
     email = models.EmailField(unique=True, db_index=True)
     date_joined = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
