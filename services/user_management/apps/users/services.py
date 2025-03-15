@@ -39,3 +39,20 @@ def user_admin_update(*, user: AdminUser, data):
         return updated_user
     except ValidationError as e:
         raise e
+
+
+@transaction.atomic
+def user_staff_update(*, user: StaffUser, data):
+    non_side_effect_fields = [
+        "email",
+        "full_name",
+        "availability_status",
+    ]
+
+    try:
+        updated_user = model_update(
+            instance=user, fields=non_side_effect_fields, data=data
+        )
+        return updated_user
+    except ValidationError as e:
+        raise e
