@@ -131,6 +131,7 @@ class StaffUserDetailApi(APIView):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
         email = serializers.EmailField()
+        availability_status = serializers.CharField(max_length=32)
         is_staff = serializers.BooleanField()
 
     def get(self, request: HttpRequest, user_id):
