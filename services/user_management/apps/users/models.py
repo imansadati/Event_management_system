@@ -106,7 +106,7 @@ class StaffUser(BaseUser):
     is_staff = models.BooleanField(default=True)
     job_title = models.CharField(max_length=64)
     availability_status = models.CharField(
-        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], null=True, blank=True)
+        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], default='available')
     work_experience = models.SmallIntegerField()
 
     class Meta:
