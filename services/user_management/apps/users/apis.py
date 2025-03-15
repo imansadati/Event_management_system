@@ -8,6 +8,7 @@ from shared_utils.pagination import LimitOffsetPagination, get_paginated_respons
 from rest_framework.response import Response
 from .services import user_admin_create, user_staff_create, user_attendee_create, user_admin_update, user_staff_update, user_attendee_update
 from rest_framework.exceptions import ValidationError
+from shared_utils.exception.exceptions import NotFoundProblem
 
 
 class AdminUserListApi(APIView):
@@ -118,9 +119,6 @@ class AdminUserDetailApi(APIView):
     def get(self, request: HttpRequest, user_id):
         user = user_admin_get(user_id)
 
-        if user is None:
-            raise Http404
-
         data = self.OutputAdminSerializer(user).data
 
         return Response(data, status=status.HTTP_200_OK)
@@ -154,9 +152,6 @@ class AttendeeUserDetailApi(APIView):
 
     def get(self, request: HttpRequest, user_id):
         user = user_attendee_get(user_id)
-
-        if user is None:
-            raise Http404
 
         data = self.OutputAttendeeSerializer(user).data
 
@@ -235,9 +230,6 @@ class AdminUserUpdateApi(APIView):
 
         user = user_admin_get(user_id)
 
-        if user is None:
-            raise Http404
-
         try:
             updated_user = user_admin_update(
                 user=user, data=serializer.validated_data)
@@ -271,9 +263,6 @@ class StaffUserUpdateApi(APIView):
 
         user = user_staff_get(user_id)
 
-        if user is None:
-            raise Http404
-
         try:
             updated_user = user_staff_update(
                 user=user, data=serializer.validated_data)
@@ -305,9 +294,6 @@ class AttendeeUserUpdateApi(APIView):
         serializer.is_valid(raise_exception=True)
 
         user = user_attendee_get(user_id)
-
-        if user is None:
-            raise Http404
 
         try:
             updated_user = user_attendee_update(
