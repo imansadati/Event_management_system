@@ -2,7 +2,7 @@ from django.urls import path
 from .apis import (AdminUserListApi, StaffUserListApi, AttendeeUserListApi,
                    AdminUserDetailApi, StaffUserDetailApi, AttendeeUserDetailApi,
                    AdminUserCreateApi, StaffUserCreateApi, AttendeeUserCreateApi,
-                   AdminUserUpdateApi, StaffUserUpdateApi)
+                   AdminUserUpdateApi, StaffUserUpdateApi, AttendeeUserUpdateApi)
 urlpatterns = [
     path('admins/', AdminUserListApi.as_view(), name='admin_user_list'),
     path('staff/', StaffUserListApi.as_view(), name='staff_user_list'),
@@ -21,4 +21,6 @@ urlpatterns = [
          AdminUserUpdateApi.as_view(), name='admin_user_update'),
     path('staff/<int:user_id>/update',
          StaffUserUpdateApi.as_view(), name='staff_user_update'),
+    path('attendee/<int:user_id>/update',
+         AttendeeUserUpdateApi.as_view(), name='attendee_user_update'),
 ]
