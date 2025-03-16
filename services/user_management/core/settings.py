@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-import shared_utils
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,6 +24,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 THIRD_PARTY_APPS = [
     'rest_framework',
     'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 LOCAL_APPS = [
@@ -123,4 +124,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
