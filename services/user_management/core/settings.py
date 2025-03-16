@@ -28,6 +28,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     'apps.users.apps.UsersConfig',
+    'apps.authentication.apps.AuthenticationConfig',
 ]
 
 INSTALLED_APPS = [
