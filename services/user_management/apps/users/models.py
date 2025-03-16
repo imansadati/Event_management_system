@@ -47,6 +47,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=128, db_index=True)
     email = models.EmailField(unique=True, db_index=True)
     date_joined = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -105,7 +106,7 @@ class StaffUser(BaseUser):
     is_staff = models.BooleanField(default=True)
     job_title = models.CharField(max_length=64)
     availability_status = models.CharField(
-        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], null=True, blank=True)
+        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], default='available')
     work_experience = models.SmallIntegerField()
 
     class Meta:

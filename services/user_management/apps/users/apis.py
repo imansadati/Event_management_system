@@ -6,7 +6,9 @@ from .selectors import user_admin_list, user_staff_list, user_attendee_list, use
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
 from rest_framework.response import Response
-from .services import user_admin_create, user_staff_create, user_attendee_create
+from .services import user_admin_create, user_staff_create, user_attendee_create, user_admin_update, user_staff_update, user_attendee_update
+from rest_framework.exceptions import ValidationError
+from shared_utils.exception.exceptions import NotFoundProblem
 
 
 class AdminUserListApi(APIView):
@@ -117,9 +119,6 @@ class AdminUserDetailApi(APIView):
     def get(self, request: HttpRequest, user_id):
         user = user_admin_get(user_id)
 
-        if user is None:
-            raise Http404
-
         data = self.OutputAdminSerializer(user).data
 
         return Response(data, status=status.HTTP_200_OK)
@@ -130,6 +129,7 @@ class StaffUserDetailApi(APIView):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
         email = serializers.EmailField()
+        availability_status = serializers.CharField(max_length=32)
         is_staff = serializers.BooleanField()
 
     def get(self, request: HttpRequest, user_id):
@@ -152,9 +152,6 @@ class AttendeeUserDetailApi(APIView):
 
     def get(self, request: HttpRequest, user_id):
         user = user_attendee_get(user_id)
-
-        if user is None:
-            raise Http404
 
         data = self.OutputAttendeeSerializer(user).data
 
@@ -212,3 +209,102 @@ class AttendeeUserCreateApi(APIView):
 
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class AdminUserUpdateApi(APIView):
+    class InputAdminSerializer(serializers.Serializer):
+        full_name = serializers.CharField(max_length=128)
+        email = serializers.EmailField()
+
+        # check the user does not enter additional fields
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def post(self, request: HttpRequest, user_id):
+        serializer = self.InputAdminSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = user_admin_get(user_id)
+
+        try:
+            updated_user = user_admin_update(
+                user=user, data=serializer.validated_data)
+
+            return Response(AdminUserDetailApi.OutputAdminSerializer(updated_user).data, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            if e.get_codes() == ["no_content"]:
+                return Response({"detail": "No changes detected. User data remains the same."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StaffUserUpdateApi(APIView):
+    class InputStaffSerializer(serializers.Serializer):
+        full_name = serializers.CharField(max_length=128)
+        email = serializers.EmailField()
+        availability_status = serializers.ChoiceField(
+            choices=[('available', 'Available'), ('busy', 'Busy')])
+
+        # check the user does not enter additional fields
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def post(self, request: HttpRequest, user_id):
+        serializer = self.InputStaffSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = user_staff_get(user_id)
+
+        try:
+            updated_user = user_staff_update(
+                user=user, data=serializer.validated_data)
+
+            return Response(StaffUserDetailApi.OutputStaffSerializer(updated_user).data, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            if e.get_codes() == ["no_content"]:
+                return Response({"detail": "No changes detected. User data remains the same."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AttendeeUserUpdateApi(APIView):
+    class InputAttendeeSerializer(serializers.Serializer):
+        full_name = serializers.CharField(max_length=128)
+        email = serializers.EmailField()
+
+        # check the user does not enter additional fields
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def post(self, request: HttpRequest, user_id):
+        serializer = self.InputAttendeeSerializer(
+            data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        user = user_attendee_get(user_id)
+
+        try:
+            updated_user = user_attendee_update(
+                user=user, data=serializer.validated_data)
+
+            return Response(AttendeeUserDetailApi.OutputAttendeeSerializer(updated_user).data, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
+            if e.get_codes() == ["no_content"]:
+                return Response({"detail": "No changes detected. User data remains the same."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
