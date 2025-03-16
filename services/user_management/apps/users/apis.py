@@ -216,6 +216,7 @@ class AdminUserUpdateApi(APIView):
         full_name = serializers.CharField(max_length=128)
         email = serializers.EmailField()
 
+        # check the user does not enter additional fields
         def validate(self, data):
             extra_fields = set(self.initial_data.keys()) - \
                 set(self.fields.keys())
@@ -249,6 +250,7 @@ class StaffUserUpdateApi(APIView):
         availability_status = serializers.ChoiceField(
             choices=[('available', 'Available'), ('busy', 'Busy')])
 
+        # check the user does not enter additional fields
         def validate(self, data):
             extra_fields = set(self.initial_data.keys()) - \
                 set(self.fields.keys())
@@ -280,6 +282,7 @@ class AttendeeUserUpdateApi(APIView):
         full_name = serializers.CharField(max_length=128)
         email = serializers.EmailField()
 
+        # check the user does not enter additional fields
         def validate(self, data):
             extra_fields = set(self.initial_data.keys()) - \
                 set(self.fields.keys())
