@@ -45,3 +45,18 @@ class AttendeeLoginApi(APIView):
     def post(self, request: HttpRequest):
         serializer = self.InputAttendeeLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        user = authenticate_user(**serializer.validated_data)
+
+        if not user:
+            raise AuthenticationFailed()
+
+        refresh = RefreshToken.for_user(user)
+        access_token = str(refresh.access_token)
+
+        data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
+        data.update({
+            'access_token': access_token,
+            'refresh_token': str(refresh),
+        })
+        return Response(data=data)
