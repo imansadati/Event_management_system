@@ -6,6 +6,8 @@ from django.http import HttpRequest
 from rest_framework_simplejwt.tokens import RefreshToken
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
+from .services import authenticate_user
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -33,3 +35,13 @@ class AttendeeRegisterApi(APIView):
             'refresh_token': str(refresh),
         })
         return Response(data=data)
+
+
+class AttendeeLoginApi(APIView):
+    class InputAttendeeLoginSerializer(serializers.Serializer):
+        identifier = serializers.CharField(max_length=128, write_only=True)
+        password = serializers.CharField(max_length=128, write_only=True)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputAttendeeLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
