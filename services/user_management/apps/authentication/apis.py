@@ -3,11 +3,10 @@ from apps.users.services import user_attendee_create
 from rest_framework import serializers
 from apps.users.models import AttendeeUser
 from django.http import HttpRequest
-from rest_framework_simplejwt.tokens import RefreshToken
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .services import authenticate_user
+from .services import authenticate_user, generate_tokens
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -26,14 +25,10 @@ class AttendeeRegisterApi(APIView):
 
         user = user_attendee_create(**serializer.validated_data)
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
+        tokens = generate_tokens(user)
 
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
-        data.update({
-            'access_token': access_token,
-            'refresh_token': str(refresh),
-        })
+        data.update(tokens)
         return Response(data=data)
 
 
@@ -51,12 +46,8 @@ class AttendeeLoginApi(APIView):
         if not user:
             raise AuthenticationFailed()
 
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
+        tokens = generate_tokens(user)
 
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
-        data.update({
-            'access_token': access_token,
-            'refresh_token': str(refresh),
-        })
+        data.update(tokens)
         return Response(data=data)
