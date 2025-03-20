@@ -32,13 +32,13 @@ class AttendeeRegisterApi(APIView):
         return Response(data=data)
 
 
-class AttendeeLoginApi(APIView):
-    class InputAttendeeLoginSerializer(serializers.Serializer):
+class LoginApi(APIView):
+    class InputLoginSerializer(serializers.Serializer):
         identifier = serializers.CharField(max_length=128, write_only=True)
         password = serializers.CharField(max_length=128, write_only=True)
 
     def post(self, request: HttpRequest):
-        serializer = self.InputAttendeeLoginSerializer(data=request.data)
+        serializer = self.InputLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user = authenticate_user(**serializer.validated_data)
@@ -48,6 +48,11 @@ class AttendeeLoginApi(APIView):
 
         tokens = generate_tokens(user)
 
-        data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
-        data.update(tokens)
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'full_name': user.full_name,
+            'tokens': tokens
+        }
         return Response(data=data)

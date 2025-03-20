@@ -1,7 +1,7 @@
 from django.urls import path
-from .apis import AttendeeRegisterApi, AttendeeLoginApi
+from .apis import AttendeeRegisterApi, LoginApi
 
 urlpatterns = [
     path('signup/', AttendeeRegisterApi.as_view(), name='attendee_register'),
-    path('signin/', AttendeeLoginApi.as_view(), name='attendee_login'),
+    path('signin/', LoginApi.as_view(), name='login'),
 ]
