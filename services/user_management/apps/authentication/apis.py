@@ -6,7 +6,6 @@ from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from jwt.exceptions import ExpiredSignatureError
 from .services import authenticate_user, generate_tokens, blacklist_refreshtoken, is_refreshtoken_blacklisted
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
@@ -82,6 +81,23 @@ class CustomRefreshTokenApi(APIView):
                 }, status=status.HTTP_200_OK)
 
             raise AuthenticationFailed()
+        except ExpiredTokenError:
+            raise AuthenticationFailed(
+                detail='Refresh token has expired. Please log in again.')
+
+
+class LogoutApi(APIView):
+    def post(self, request: HttpRequest):
+        refresh_token = request.data.get('refresh')
+
+        if not refresh_token:
+            raise ValidationError('Refresh token is required')
+
+        try:
+            token = RefreshToken(refresh_token)
+            blacklist_refreshtoken(token)
+            return Response({"message": "Successfully logged out."}, status=200)
+
         except ExpiredTokenError:
             raise AuthenticationFailed(
                 detail='Refresh token has expired. Please log in again.')
