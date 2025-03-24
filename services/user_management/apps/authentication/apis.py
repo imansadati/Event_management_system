@@ -65,3 +65,17 @@ class CustomRefreshTokenApi(APIView):
         if redis_client.get(f'blacklist:{refresh_token}'):
             raise AuthenticationFailed(
                 detail='Token is blacklisted. Please log in again.')
+
+        try:
+            new_token = refreshtoken_blacklist_processing(refresh_token)
+
+            if new_token:
+                return Response({
+                    'access_token': new_token['access_token'],
+                    'refresh_token': new_token['refresh_token']
+                }, status=status.HTTP_200_OK)
+            raise NotFound()
+
+        except ExpiredSignatureError:
+            raise AuthenticationFailed(
+                detail='Refresh token has expired. Please log in again.')

@@ -11,4 +11,12 @@ def get_user_by_identifier(identifier):
     )
     return user
 
-    
+
+def get_user_by_id(user_id):
+    """Fetch a user using id"""
+    user = (
+        AttendeeUser.objects.filter(id=user_id).first() or
+        AdminUser.objects.filter(id=user_id).first() or
+        StaffUser.objects.filter(id=user_id).first()
+    )
+    return user
