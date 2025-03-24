@@ -23,8 +23,12 @@ def generate_tokens(user):
     }
 
 
+def is_refreshtoken_blacklisted(refresh_token):
+    return redis_client.exists(f'blacklist:{refresh_token}')
+
+
 def refreshtoken_blacklist_processing(refresh_token):
-    """Validate and store refresh token in blacklist redis."""
+    """Validate and store refresh token in blacklist redis and generate new tokens."""
     token = RefreshToken(refresh_token)
 
     user_id = token['user_id']

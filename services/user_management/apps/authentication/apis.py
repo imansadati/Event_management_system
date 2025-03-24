@@ -7,8 +7,7 @@ from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from jwt.exceptions import ExpiredSignatureError
-from .services import authenticate_user, generate_tokens, refreshtoken_blacklist_processing
-from .redis_client import redis_client
+from .services import authenticate_user, generate_tokens, refreshtoken_blacklist_processing, is_refreshtoken_blacklisted
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -62,7 +61,7 @@ class CustomRefreshTokenApi(APIView):
         if not refresh_token:
             raise ValidationError(detail='Refresh token is required.')
 
-        if redis_client.get(f'blacklist:{refresh_token}'):
+        if is_refreshtoken_blacklisted(refresh_token):
             raise AuthenticationFailed(
                 detail='Token is blacklisted. Please log in again.')
 
