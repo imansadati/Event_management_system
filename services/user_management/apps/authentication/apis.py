@@ -1,12 +1,14 @@
 from rest_framework.views import APIView
 from apps.users.services import user_attendee_create
-from rest_framework import serializers
+from rest_framework import serializers, status
 from apps.users.models import AttendeeUser
 from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
-from .services import authenticate_user, generate_tokens
+from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
+from jwt.exceptions import ExpiredSignatureError
+from .services import authenticate_user, generate_tokens, refreshtoken_blacklist_processing
+from .redis_client import redis_client
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -51,3 +53,15 @@ class LoginApi(APIView):
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
         data.update(tokens)
         return Response(data=data)
+
+
+class CustomRefreshTokenApi(APIView):
+    def post(self, request: HttpRequest):
+        refresh_token = request.data.get('refresh')
+
+        if not refresh_token:
+            raise ValidationError(detail='Refresh token is required.')
+
+        if redis_client.get(f'blacklist:{refresh_token}'):
+            raise AuthenticationFailed(
+                detail='Token is blacklisted. Please log in again.')
