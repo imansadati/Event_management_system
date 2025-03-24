@@ -1,10 +1,10 @@
-from .selectors import get_attendee_by_identifier
+from .selectors import get_user_by_identifier
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def authenticate_user(identifier: str, password: str):
     """Authenticate the user by checking credentials."""
-    user = get_attendee_by_identifier(identifier)
+    user = get_user_by_identifier(identifier)
 
     if not user or not user.check_password(password):
         return None
