@@ -51,8 +51,12 @@ class LoginApi(APIView):
 
         tokens = generate_tokens(user)
 
-        data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
-        data.update(tokens)
+        data = {
+            'id': user.pk,
+            'username': user.username,
+            'email': user.email,
+            'tokens': tokens
+        }
         return Response(data=data)
 
 
