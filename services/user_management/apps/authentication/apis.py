@@ -5,9 +5,12 @@ from apps.users.models import AttendeeUser
 from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from jwt.exceptions import ExpiredSignatureError
-from .services import authenticate_user, generate_tokens, refreshtoken_blacklist_processing, is_refreshtoken_blacklisted
+from .services import authenticate_user, generate_tokens, blacklist_refreshtoken, is_refreshtoken_blacklisted
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import ExpiredTokenError
+from .selectors import get_user_by_id
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -66,15 +69,19 @@ class CustomRefreshTokenApi(APIView):
                 detail='Token is blacklisted. Please log in again.')
 
         try:
-            new_token = refreshtoken_blacklist_processing(refresh_token)
+            token = RefreshToken(refresh_token)
+            user_id = token['user_id']
+            user = get_user_by_id(user_id)
 
-            if new_token:
+            if user:
+                blacklist_refreshtoken(refresh_token)
+                new_token = generate_tokens(user)
                 return Response({
                     'access_token': new_token['access_token'],
                     'refresh_token': new_token['refresh_token']
                 }, status=status.HTTP_200_OK)
-            raise NotFound()
 
-        except ExpiredSignatureError:
+            raise AuthenticationFailed()
+        except ExpiredTokenError:
             raise AuthenticationFailed(
                 detail='Refresh token has expired. Please log in again.')

@@ -1,4 +1,4 @@
-from .selectors import get_user_by_identifier, get_user_by_id
+from .selectors import get_user_by_identifier
 from rest_framework_simplejwt.tokens import RefreshToken
 from .redis_client import redis_client
 from django.conf import settings
@@ -24,19 +24,11 @@ def generate_tokens(user):
 
 
 def is_refreshtoken_blacklisted(refresh_token):
+    """Check if the given token is blacklisted in Redis."""
     return redis_client.exists(f'blacklist:{refresh_token}')
 
 
-def refreshtoken_blacklist_processing(refresh_token):
+def blacklist_refreshtoken(refresh_token):
     """Validate and store refresh token in blacklist redis and generate new tokens."""
-    token = RefreshToken(refresh_token)
-
-    user_id = token['user_id']
-    user = get_user_by_id(user_id)
-    if user:
-        new_refresh_token = generate_tokens(user)
-        redis_client.setex(
-            f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
-
-        return new_refresh_token
-    return None
+    redis_client.setex(
+        f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
