@@ -3,20 +3,20 @@ from django.db.models import Q
 
 
 def get_user_by_identifier(identifier):
-    """Fetch a user using email or username"""
+    """Fetch a user using email or username and check roles."""
     user = (
-        AttendeeUser.objects.filter(Q(email=identifier) | Q(username=identifier)).first() or
-        AdminUser.objects.filter(Q(email=identifier) | Q(username=identifier)).first() or
-        StaffUser.objects.filter(Q(email=identifier) | Q(username=identifier)).first()
+        AttendeeUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_attendee=True)).first() or
+        AdminUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_admin=True)).first() or
+        StaffUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_staff=True)).first()
     )
     return user
 
 
 def get_user_by_id(user_id):
-    """Fetch a user using id"""
+    """Fetch a user using id and check roles."""
     user = (
-        AttendeeUser.objects.filter(id=user_id).first() or
-        AdminUser.objects.filter(id=user_id).first() or
-        StaffUser.objects.filter(id=user_id).first()
+        AttendeeUser.objects.filter(Q(id=user_id) & Q(is_attendee=True)).first() or
+        AdminUser.objects.filter(Q(id=user_id) & Q(is_admin=True)).first() or
+        StaffUser.objects.filter(Q(id=user_id) & Q(is_staff=True)).first()
     )
     return user
