@@ -2,6 +2,8 @@ from .selectors import get_user_by_identifier
 from rest_framework_simplejwt.tokens import RefreshToken
 from .redis_client import redis_client
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
+from django.db import transaction
 
 
 def authenticate_user(identifier: str, password: str):
@@ -32,3 +34,12 @@ def blacklist_refreshtoken(refresh_token):
     """Validate and store refresh token in blacklist redis and generate new tokens."""
     redis_client.setex(
         f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
+
+
+@transaction.atomic
+def update_password(user, new_password):
+    try:
+        user.set_password(new_password)
+        user.save()
+    except ValidationError as e:
+        raise ValidationError(e)

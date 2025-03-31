@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from .services import authenticate_user, generate_tokens, blacklist_refreshtoken, is_refreshtoken_blacklisted
+from .services import authenticate_user, generate_tokens, blacklist_refreshtoken, is_refreshtoken_blacklisted, update_password
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id
@@ -109,3 +109,53 @@ class LogoutApi(APIView):
         except ExpiredTokenError:
             raise AuthenticationFailed(
                 detail='Refresh token has expired. Please log in again.')
+
+
+class ChangePasswordApi(APIView):
+    class InputChangePasswordSerializer(serializers.Serializer):
+        old_password = serializers.CharField(write_only=True)
+        new_password = serializers.CharField(min_length=6, write_only=True)
+        confirm_password = serializers.CharField(min_length=6, write_only=True)
+
+        # You can use the validate_password function to select a secure password in the new_password attr.
+        def validate(self, attrs):
+            if attrs['new_password'] != attrs['confirm_password']:
+                raise ValidationError(
+                    {'confirm_password': 'passwords do not match.'})
+            return attrs
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        old_password = serializer.validated_data['old_password']
+        new_password = serializer.validated_data['new_password']
+        user = request.user
+
+        # Get refresh token from cookie or request.
+        refresh_token = request.COOKIES.get(
+            'refresh') or request.data.get('refresh')
+
+        if not refresh_token:
+            raise ValidationError('Refresh token is required')
+
+        if not user.check_password(old_password):
+            raise ValidationError('Password is incorrect. try again.')
+
+        try:
+            refresh_token = RefreshToken(refresh_token)
+            
+            if not is_refreshtoken_blacklisted(refresh_token):
+                update_password(user, new_password)
+
+                blacklist_refreshtoken(refresh_token)
+                return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
+            raise AuthenticationFailed(
+                detail='Token is blacklisted. Please log in again.')
+
+        except ExpiredTokenError:
+            raise AuthenticationFailed(
+                detail='Refresh token has expired. Please log in again.')
+            
+        except Exception as e:
+            raise ValidationError(e)
