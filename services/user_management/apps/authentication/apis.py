@@ -97,6 +97,10 @@ class LogoutApi(APIView):
         if not refresh_token:
             raise ValidationError('Refresh token is required')
 
+        if is_refreshtoken_blacklisted(refresh_token):
+            raise AuthenticationFailed(
+                detail='Token is blacklisted. Please log in again.')
+
         try:
             token = RefreshToken(refresh_token)
             blacklist_refreshtoken(token)
