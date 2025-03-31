@@ -31,7 +31,7 @@ def is_refreshtoken_blacklisted(refresh_token):
 
 
 def blacklist_refreshtoken(refresh_token):
-    """Validate and store refresh token in blacklist redis and generate new tokens."""
+    """store refresh token in blacklist redis."""
     redis_client.setex(
         f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
 

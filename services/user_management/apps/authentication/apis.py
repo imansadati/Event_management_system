@@ -144,7 +144,7 @@ class ChangePasswordApi(APIView):
 
         try:
             refresh_token = RefreshToken(refresh_token)
-            
+
             if not is_refreshtoken_blacklisted(refresh_token):
                 update_password(user, new_password)
 
@@ -156,6 +156,5 @@ class ChangePasswordApi(APIView):
         except ExpiredTokenError:
             raise AuthenticationFailed(
                 detail='Refresh token has expired. Please log in again.')
-            
         except Exception as e:
             raise ValidationError(e)
