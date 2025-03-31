@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-import shared_utils
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,10 +24,12 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 THIRD_PARTY_APPS = [
     'rest_framework',
     'django_filters',
+    'rest_framework_simplejwt',
 ]
 
 LOCAL_APPS = [
     'apps.users.apps.UsersConfig',
+    'apps.authentication.apps.AuthenticationConfig',
 ]
 
 INSTALLED_APPS = [
@@ -122,4 +124,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "apps.authentication.jwt_authentication.CustomJWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
 }

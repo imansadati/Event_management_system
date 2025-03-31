@@ -1,8 +1,6 @@
 from .models import AdminUser, StaffUser, AttendeeUser
 from .filters import AdminFilter, StaffFilter, AttendeeFilter
-from django.http import Http404
 from django.shortcuts import get_object_or_404
-from shared_utils.exception.exceptions import NotFoundProblem
 
 
 def user_admin_list(*, filters):

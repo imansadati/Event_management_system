@@ -25,10 +25,19 @@ def custom_exception_handler(exc, context):
 
     # Handle DRF ValidationError
     if isinstance(exc, DRFValidationError):
-        invalid_params = [
-            {"name": key, "reason": ", ".join([str(msg) for msg in value])}
-            for key, value in exc.detail.items()
-        ]
+        if isinstance(exc.detail, dict):  # Field-specific errors
+            invalid_params = [
+                {"name": key, "reason": ", ".join([str(msg) for msg in value])}
+                for key, value in exc.detail.items()
+            ]
+        elif isinstance(exc.detail, list):  # Non-field errors
+            invalid_params = [
+                {"name": "non_field_errors", "reason": ", ".join(
+                    [str(msg) for msg in exc.detail])}
+            ]
+        else:  # Fallback case (shouldn't happen often)
+            invalid_params = [{"name": "error", "reason": str(exc)}]
+
         return Response(
             ValidationErrorProblem(invalid_params).get_full_details(),
             status=ValidationErrorProblem([]).status_code

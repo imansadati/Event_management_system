@@ -8,7 +8,6 @@ from shared_utils.pagination import LimitOffsetPagination, get_paginated_respons
 from rest_framework.response import Response
 from .services import user_admin_create, user_staff_create, user_attendee_create, user_admin_update, user_staff_update, user_attendee_update
 from rest_framework.exceptions import ValidationError
-from shared_utils.exception.exceptions import NotFoundProblem
 
 
 class AdminUserListApi(APIView):
