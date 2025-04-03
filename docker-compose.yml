@@ -1,17 +1,50 @@
 version: "3.9"
 
 services:
-  db:
+  user_management_db:
     image: postgres:17.2
-    container_name: db
+    container_name: user_management_db
     networks:
       - main
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user_db_data:/var/lib/postgresql/data
     env_file:
-      - ./postgres.env
+      - ./services/user_management/postgres.env
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    restart: always
+
+  notification_system_db:
+    image: postgres:17.2
+    container_name: notification_system_db
+    networks:
+      - main
+    volumes:
+      - notification_db_data:/var/lib/postgresql/data
+    env_file:
+      - ./services/notification_system/postgres.env
+    ports:
+      - "5434:5432"
+    restart: always
+
+  notification:
+    build:
+      context: ./services/notification_system
+      dockerfile: Dockerfile
+    image: notification:1.0
+    container_name: notification
+    volumes:
+      - ./services/notification_system:/app/
+      - static:/app/static
+      - media:/app/media
+    networks:
+      - main
+    depends_on:
+      - notification_system_db
+    env_file:
+      - ./services/notification_system/.env
+    ports:
+      - "8002:8000"
     restart: always
 
   user_management:
@@ -27,7 +60,7 @@ services:
     networks:
       - main
     depends_on:
-      - db
+      - user_management_db
     env_file:
       - ./services/user_management/.env
     ports:
@@ -46,7 +79,8 @@ services:
     networks:
       - main
     depends_on:
-      - db
+      - user_management_db
+      - notification_system_db
     restart: always
 
   redis:
@@ -60,7 +94,8 @@ services:
     command: [ "redis-server", "--save", "60", "1", "--loglevel", "warning" ]
 
 volumes:
-  postgres_data:
+  notification_db_data:
+  user_db_data:
   static:
   media:
 
