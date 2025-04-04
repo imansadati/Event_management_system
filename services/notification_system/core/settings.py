@@ -19,7 +19,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 
 THIRD_PARTY_APPS = [
-    
+
 ]
 
 LOCAL_APPS = [
@@ -109,3 +109,14 @@ STATIC_ROOT = '/app/static'
 MEDIA_ROOT = '/app/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}

@@ -15,6 +15,7 @@ def serve():
         NotificationService(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
+    print("Notification gRPC Server started on port 50051")
     server.wait_for_termination()
 
 
