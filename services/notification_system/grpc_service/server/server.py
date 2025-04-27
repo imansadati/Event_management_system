@@ -7,7 +7,7 @@ from apps.notification.utils import send_email
 
 class NotificationService(NotificationServiceServicer):
     def SendEmail(self, request, context):
-        print(f'send email for: {request.recipient}')
+        print(f'sending email for: {request.recipient} - {request.subject}')
 
         success = send_email(request.recipient, request.subject, request.body)
         if success:
