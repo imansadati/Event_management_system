@@ -10,6 +10,7 @@ from .services import authenticate_user, generate_tokens, blacklist_refreshtoken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id
+from grpc_service.client.client import send_email_via_rpc
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -48,6 +49,9 @@ class LoginApi(APIView):
 
         if not user:
             raise AuthenticationFailed()
+
+        send_email_via_rpc(
+            user.email, 'wellcome', 'wellcome to our platform')
 
         tokens = generate_tokens(user)
 
