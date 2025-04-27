@@ -5,9 +5,9 @@ import json
 
 
 @transaction.atomic
-def create_email_log(recipient, subject, message, status, error=None):
+def create_email_log(recipient, subject, body, status, error=None):
     EmailLog.objects.create(recipient=recipient, subject=subject,
-                            message=message, status=status, error=error)
+                            body=body, status=status, error_message=error)
 
 
 def save_failed_emails_to_redis(email_data):

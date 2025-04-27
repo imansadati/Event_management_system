@@ -4,7 +4,7 @@ from django.db import models
 class EmailLog(models.Model):
     recipient = models.EmailField()
     subject = models.CharField(max_length=256)
-    message = models.TextField()
+    body = models.TextField()
     status = models.CharField(max_length=20, choices=[
         ('sent', 'Sent'),
         ('failed', 'Failed'),
