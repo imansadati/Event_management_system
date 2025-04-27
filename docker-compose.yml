@@ -45,6 +45,7 @@ services:
       - ./services/notification_system/.env
     ports:
       - "8002:8000"
+      - "50051:50051"
     restart: always
 
   user_management:
