@@ -54,7 +54,7 @@ services:
       dockerfile: Dockerfile
     image: notification:1.0
     entrypoint: ''
-    command: [ 'celery', '-A', '...', 'worker', '-l', 'info' ]
+    command: [ 'celery', '-A', 'core', 'worker', '-l', 'info' ]
     container_name: notification_celery_worker
     volumes:
       - ./services/notification_system:/app/
@@ -121,6 +121,8 @@ services:
     ports:
       - '5672:5672' # broker port
       - '15672:15672' # management UI
+    networks:
+      - main
     env_file:
       - ./rabbitmq.env
     restart: always
