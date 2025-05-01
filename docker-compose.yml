@@ -54,7 +54,7 @@ services:
       dockerfile: Dockerfile
     image: notification:1.0
     entrypoint: ''
-    command: celery -A ... worker -l info
+    command: [ 'celery', '-A', '...', 'worker', '-l', 'info' ]
     container_name: notification_celery_worker
     volumes:
       - ./services/notification_system:/app/
@@ -64,6 +64,7 @@ services:
       - main
     depends_on:
       - notification
+      - rabbitmq
     env_file:
       - ./services/notification_system/.env
     restart: always
@@ -113,6 +114,16 @@ services:
       - "6379:6379"
     restart: always
     command: [ "redis-server", "--save", "60", "1", "--loglevel", "warning" ]
+
+  rabbitmq:
+    image: rabbitmq:4.1.0-management
+    container_name: rabbitmq
+    ports:
+      - '5672:5672' # broker port
+      - '15672:15672' # management UI
+    env_file:
+      - ./rabbitmq.env
+    restart: always
 
 volumes:
   notification_db_data:
