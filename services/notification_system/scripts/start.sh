@@ -13,12 +13,12 @@ echo "Loaded environment variables. Running in ${DJANGO_ENV} mode..."
 if [ "$DJANGO_ENV" = "development" ]; then
   echo "Running development server..."
   python manage.py migrate
-  python manage.py start_grpc
+  python manage.py start_grpc &
   python manage.py runserver 0.0.0.0:8000
 else
   echo "Running production server with Gunicorn..."
   python manage.py collectstatic --noinput
   python manage.py migrate
-  python manage.py start_grpc
+  python manage.py start_grpc &
   gunicorn core.wsgi:application --bind 0.0.0.0:8000
 fi
