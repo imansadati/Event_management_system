@@ -24,7 +24,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Proto files compiled.'))
 
-        # Fix import in generated file. check if without this piece of code you can remove it
+        # Fix import format in generated files by grpc.
+        # check it without this piece of code if worked for you, you can remove it.
         grpc_file = out_path / 'notification_pb2_grpc.py'
         if grpc_file.exists():
             with open(grpc_file, 'r') as f:

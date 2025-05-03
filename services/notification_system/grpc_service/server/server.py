@@ -1,19 +1,15 @@
 import grpc
 from concurrent import futures
 from grpc_service.server.generated.notification_pb2_grpc import NotificationServiceServicer, add_NotificationServiceServicer_to_server
-from grpc_service.server.generated import notification_pb2
-from apps.notification.utils import send_email
+from apps.notification.tasks import send_email_task
 
 
 class NotificationService(NotificationServiceServicer):
     def SendEmail(self, request, context):
         print(f'sending email for: {request.recipient} - {request.subject}')
 
-        success = send_email(request.recipient, request.subject, request.body)
-        if success:
-            return notification_pb2.SendEmailResponse(success=True, message='Email sent')
-        else:
-            return notification_pb2.SendEmailResponse(success=False, message='Failed to sent')
+        send_email_task.delay(
+            request.recipient, request.subject, request.body)
 
 
 def serve():
