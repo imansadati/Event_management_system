@@ -1,6 +1,7 @@
 import grpc
 from concurrent import futures
 from grpc_service.server.generated.notification_pb2_grpc import NotificationServiceServicer, add_NotificationServiceServicer_to_server
+from grpc_service.server.generated import notification_pb2
 from apps.notification.tasks import send_email_task
 
 
@@ -10,6 +11,11 @@ class NotificationService(NotificationServiceServicer):
 
         send_email_task.delay(
             request.recipient, request.subject, request.body)
+
+        return notification_pb2.SendEmailResponse(
+            success=True,
+            message='Email queued successfully',
+        )
 
 
 def serve():
