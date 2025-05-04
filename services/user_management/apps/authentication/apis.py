@@ -6,10 +6,11 @@ from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
-from .services import authenticate_user, generate_tokens, blacklist_refreshtoken, is_refreshtoken_blacklisted, update_password
+from .services import (authenticate_user, generate_tokens, blacklist_refreshtoken,
+                       is_refreshtoken_blacklisted, update_password, generate_reset_password_token)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
-from .selectors import get_user_by_id
+from .selectors import get_user_by_id, get_user_by_email
 from grpc_service.client.client import send_email_via_rpc
 
 
@@ -162,3 +163,24 @@ class ChangePasswordApi(APIView):
                 detail='Refresh token has expired. Please log in again.')
         except Exception as e:
             raise ValidationError(e)
+
+
+# Respose to generates and send token to user.
+class ForgotPasswordApi(APIView):
+    class InputForgotSerializer(serializers.Serializer):
+        email = serializers.EmailField(max_length=128)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputForgotSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = get_user_by_email(**serializer.validated_data)
+
+        if user:
+            token = generate_reset_password_token(user)
+            reset_url = f'http://localhost:8001/api/auth/reset-password?token={token}'
+
+            send_email_via_rpc(recipient=user.email, subject='reset password process',
+                               body=f'Click on this url to continue change password process: {reset_url}')
+
+        return Response({'detail': 'If this email exists, a reset link was sent.'})

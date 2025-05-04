@@ -4,6 +4,8 @@ from .redis_client import redis_client
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
 from django.db import transaction
+import jwt
+from datetime import datetime
 
 
 def authenticate_user(identifier: str, password: str):
@@ -43,3 +45,14 @@ def update_password(user, new_password):
         user.save()
     except ValidationError as e:
         raise ValidationError(e)
+
+
+def generate_reset_password_token(user):
+    payload = {
+        'user_id': user.id,
+        'email': user.email,
+        'exp': datetime.now() + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
+        'type': 'password_reset'
+    }
+    token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
+    return token

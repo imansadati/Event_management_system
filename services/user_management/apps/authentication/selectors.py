@@ -7,7 +7,8 @@ def get_user_by_identifier(identifier):
     user = (
         AttendeeUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_attendee=True)).first() or
         AdminUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_admin=True)).first() or
-        StaffUser.objects.filter(Q(email=identifier) | Q(username=identifier) & Q(is_staff=True)).first()
+        StaffUser.objects.filter(Q(email=identifier) | Q(
+            username=identifier) & Q(is_staff=True)).first()
     )
     return user
 
@@ -18,5 +19,15 @@ def get_user_by_id(user_id):
         AttendeeUser.objects.filter(Q(id=user_id) & Q(is_attendee=True)).first() or
         AdminUser.objects.filter(Q(id=user_id) & Q(is_admin=True)).first() or
         StaffUser.objects.filter(Q(id=user_id) & Q(is_staff=True)).first()
+    )
+    return user
+
+
+def get_user_by_email(email):
+    """Fetch a user using email and check roles."""
+    user = (
+        AttendeeUser.objects.filter(Q(email=email) & Q(is_attendee=True)).first() or
+        AdminUser.objects.filter(Q(email=email) & Q(is_admin=True)).first() or
+        StaffUser.objects.filter(Q(email=email) & Q(is_staff=True)).first()
     )
     return user
