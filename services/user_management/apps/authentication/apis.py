@@ -7,10 +7,11 @@ from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
 from .services import (authenticate_user, generate_tokens, blacklist_refreshtoken,
-                       is_refreshtoken_blacklisted, update_password, generate_reset_password_token)
+                       is_refreshtoken_blacklisted, update_password, generate_reset_password_token,
+                       verify_reset_password_token)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
-from .selectors import get_user_by_id, get_user_by_email
+from .selectors import get_user_by_id, get_user_by_email, get_user_by_email_and_id
 from grpc_service.client.client import send_email_via_rpc
 
 
@@ -193,4 +194,10 @@ class ResetPasswordApi(APIView):
         new_password = serializers.CharField(min_length=6)
 
     def post(self, request: HttpRequest):
-        pass
+        token = self.InputResetSerializer['token']
+        payload = verify_reset_password_token(token)
+
+        if not payload:
+            return ValidationError(detail='Invalid or expired token.', code=status.HTTP_400_BAD_REQUEST)
+
+        user = get_user_by_email_and_id()

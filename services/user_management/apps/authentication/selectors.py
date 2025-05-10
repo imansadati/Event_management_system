@@ -31,3 +31,13 @@ def get_user_by_email(email):
         StaffUser.objects.filter(Q(email=email) & Q(is_staff=True)).first()
     )
     return user
+
+
+def get_user_by_email_and_id(id, email):
+    """Fetch a user using email and id also check roles."""
+    user = (
+        AttendeeUser.objects.filter(Q(email=email) & Q(is_attendee=True)).first() or
+        AdminUser.objects.filter(Q(email=email) & Q(is_admin=True)).first() or
+        StaffUser.objects.filter(Q(email=email) & Q(is_staff=True)).first()
+    )
+    return user
