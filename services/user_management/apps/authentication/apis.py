@@ -184,3 +184,13 @@ class ForgotPasswordApi(APIView):
                                body=f'Click on this url to continue change password process: {reset_url}')
 
         return Response({'detail': 'If this email exists, a reset link was sent.'})
+
+
+# Response to validate token and reset password.
+class ResetPasswordApi(APIView):
+    class InputResetSerializer(serializers.Serializer):
+        token = serializers.CharField(max_length=64)
+        new_password = serializers.CharField(min_length=6)
+
+    def post(self, request: HttpRequest):
+        pass
