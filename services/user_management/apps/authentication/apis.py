@@ -207,4 +207,13 @@ class ResetPasswordApi(APIView):
             raise ValidationError(
                 detail='Invalid or expired token.', code=status.HTTP_400_BAD_REQUEST)
 
-        user = get_user_by_email_and_id()
+        user = get_user_by_email_and_id(
+            id=payload['user_id'], email=payload['email'])
+
+        if not user:
+            raise NotFound(detail='User not found.',
+                           code=status.HTTP_404_NOT_FOUND)
+
+        update_password(user, new_password)
+
+        return Response({"detail": "Password reset successful."})
