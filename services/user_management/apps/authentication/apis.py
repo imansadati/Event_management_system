@@ -5,7 +5,7 @@ from apps.users.models import AttendeeUser
 from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from .services import (authenticate_user, generate_tokens, blacklist_refreshtoken,
                        is_refreshtoken_blacklisted, update_password, generate_reset_password_token,
                        verify_reset_password_token)
@@ -183,6 +183,7 @@ class ForgotPasswordApi(APIView):
 
             send_email_via_rpc(recipient=user.email, subject='reset password process',
                                body=f'Click on this url to continue change password process: {reset_url}')
+            print(reset_url)
 
         return Response({'detail': 'If this email exists, a reset link was sent.'})
 
@@ -190,14 +191,20 @@ class ForgotPasswordApi(APIView):
 # Response to validate token and reset password.
 class ResetPasswordApi(APIView):
     class InputResetSerializer(serializers.Serializer):
-        token = serializers.CharField(max_length=64)
+        token = serializers.CharField(max_length=200)
         new_password = serializers.CharField(min_length=6)
 
     def post(self, request: HttpRequest):
-        token = self.InputResetSerializer['token']
+        serializer = self.InputResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = self.InputResetSerializer.validated_data['token']
+        new_password = self.InputResetSerializer.validated_data['new_password']
+
         payload = verify_reset_password_token(token)
 
         if not payload:
-            return ValidationError(detail='Invalid or expired token.', code=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(
+                detail='Invalid or expired token.', code=status.HTTP_400_BAD_REQUEST)
 
         user = get_user_by_email_and_id()
