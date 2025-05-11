@@ -60,7 +60,7 @@ def generate_reset_password_token(user):
 
 def verify_reset_password_token(token):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithm='HS256')
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
         if payload['type'] != 'password_reset':
             return None
         return payload
