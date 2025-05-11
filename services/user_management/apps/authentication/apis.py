@@ -198,8 +198,8 @@ class ResetPasswordApi(APIView):
         serializer = self.InputResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        token = self.InputResetSerializer.validated_data['token']
-        new_password = self.InputResetSerializer.validated_data['new_password']
+        token = serializer.validated_data['token']
+        new_password = serializer.validated_data['new_password']
 
         payload = verify_reset_password_token(token)
 
