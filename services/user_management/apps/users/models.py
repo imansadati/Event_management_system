@@ -67,6 +67,16 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     class Meta:
         abstract = True
 
+    @property
+    def role(self):
+        if getattr(self, 'is_admin', False):
+            return 'admin'
+        elif getattr(self, 'is_staff', False):
+            return 'staff'
+        elif getattr(self, 'is_attendee', False):
+            return 'attendee'
+        return 'unknown'
+
 
 class AdminUser(BaseUser):
     profile = models.OneToOneField(
