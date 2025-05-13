@@ -1,22 +1,13 @@
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
-ROLE_SCOPES = {
-    'attendee': {},
-    'admin': {},
-    'staff': {}
-}
-
-
 def generate_jwt_tokens(user):
-    """Generate JWT access and refresh tokens with scopes to check accesses for a user"""
+    """Generate JWT access and refresh tokens with assigning role claim for a user"""
     refresh = RefreshToken.for_user(user)
-    access_token = str(refresh.access_token)
-    scopes = ROLE_SCOPES.get(user.role, [])
+    access_token = refresh.access_token
 
-    refresh['role'] = user.role
-    refresh['scopes'] = scopes
-    refresh['email'] = user.email
+    access_token['role'] = user.role
+    access_token['email'] = user.email
 
     return {
         'access_token': str(access_token),
