@@ -8,6 +8,8 @@ def generate_jwt_tokens(user):
 
     access_token['role'] = user.role
     access_token['email'] = user.email
+    refresh['role'] = user.role
+    refresh['email'] = user.email
 
     return {
         'access_token': str(access_token),
