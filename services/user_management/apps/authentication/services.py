@@ -17,16 +17,6 @@ def authenticate_user(identifier: str, password: str):
     return user
 
 
-def generate_tokens(user):
-    """Generate JWT access and refresh tokens for a user"""
-    refresh = RefreshToken.for_user(user)
-    access_token = str(refresh.access_token)
-    return {
-        'access_token': str(access_token),
-        'refresh_token': str(refresh),
-    }
-
-
 def is_refreshtoken_blacklisted(refresh_token):
     """Check if the given token is blacklisted in Redis."""
     return redis_client.exists(f'blacklist:{refresh_token}')

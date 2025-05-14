@@ -6,13 +6,14 @@ from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
-from .services import (authenticate_user, generate_tokens, blacklist_refreshtoken,
+from .services import (authenticate_user, blacklist_refreshtoken,
                        is_refreshtoken_blacklisted, update_password, generate_reset_password_token,
                        verify_reset_password_token)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id, get_user_by_email, get_user_by_email_and_id
 from grpc_service.client.client import send_email_via_rpc
+from .tokens import generate_jwt_tokens
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -31,7 +32,7 @@ class AttendeeRegisterApi(APIView):
 
         user = user_attendee_create(**serializer.validated_data)
 
-        tokens = generate_tokens(user)
+        tokens = generate_jwt_tokens(user)
 
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
         data.update(tokens)
@@ -55,7 +56,7 @@ class LoginApi(APIView):
         send_email_via_rpc(
             user.email, 'wellcome', 'wellcome to our platform')
 
-        tokens = generate_tokens(user)
+        tokens = generate_jwt_tokens(user)
 
         data = {
             'id': user.pk,
@@ -84,7 +85,7 @@ class CustomRefreshTokenApi(APIView):
 
             if user:
                 blacklist_refreshtoken(refresh_token)
-                new_token = generate_tokens(user)
+                new_token = generate_jwt_tokens(user)
                 return Response({
                     'access_token': new_token['access_token'],
                     'refresh_token': new_token['refresh_token']
