@@ -5,8 +5,8 @@ from rest_framework.exceptions import PermissionDenied
 
 # Internal app-specific scope rules
 ROLE_SCOPES = {
-    'attendee': ['forgot:view'],
-    'staff': ['forgot:view', 'forgot:create'],
+    'attendee': [],
+    'staff': [],
     'admin': ['*'],  # wildcard: full access
 }
 
