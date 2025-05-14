@@ -28,3 +28,12 @@ class IsAuthenticatedViaJWT(BasePermission):
                     f"Missing claim: '{claim}' in token.")
 
         return True
+
+
+class HasRolePermission(BasePermission):
+    """This will check if the user has the appropriate role to access the resource."""
+    required_roles = []
+
+    def has_permission(self, request: HttpRequest, view):
+        user_role = request.user.role
+        return user_role in self.required_roles
