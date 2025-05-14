@@ -14,6 +14,7 @@ from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id, get_user_by_email, get_user_by_email_and_id
 from grpc_service.client.client import send_email_via_rpc
 from .tokens import generate_jwt_tokens
+from shared_utils.permissions import IsAuthenticatedViaJWT
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -119,6 +120,8 @@ class LogoutApi(APIView):
 
 
 class ChangePasswordApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT]
+
     class InputChangePasswordSerializer(serializers.Serializer):
         old_password = serializers.CharField(write_only=True)
         new_password = serializers.CharField(min_length=6, write_only=True)
