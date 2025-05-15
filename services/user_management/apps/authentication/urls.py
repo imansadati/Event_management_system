@@ -1,5 +1,7 @@
 from django.urls import path
-from .apis import AttendeeRegisterApi, LoginApi, CustomRefreshTokenApi, LogoutApi, ChangePasswordApi, ForgotPasswordApi, ResetPasswordApi
+from .apis import (AttendeeRegisterApi, LoginApi, CustomRefreshTokenApi,
+                   LogoutApi, ChangePasswordApi, ForgotPasswordApi,
+                   ResetPasswordApi)
 
 urlpatterns = [
     path('signup/', AttendeeRegisterApi.as_view(), name='attendee_register'),

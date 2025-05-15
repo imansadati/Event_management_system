@@ -7,8 +7,8 @@ from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
 from .services import (authenticate_user, blacklist_refreshtoken,
-                       is_refreshtoken_blacklisted, update_password, generate_reset_password_token,
-                       verify_reset_password_token)
+                       is_refreshtoken_blacklisted, update_password, generate_specific_token,
+                       verify_specific_token)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id, get_user_by_email, get_user_by_email_and_id
@@ -184,7 +184,7 @@ class ForgotPasswordApi(APIView):
         user = get_user_by_email(**serializer.validated_data)
 
         if user:
-            token = generate_reset_password_token(user)
+            token = generate_specific_token(user=user, type='reset_password')
             reset_url = f'http://localhost:8001/api/auth/reset-password?token={token}'
 
             send_email_via_rpc(recipient=user.email, subject='reset password process',
@@ -207,7 +207,7 @@ class ResetPasswordApi(APIView):
         token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
 
-        payload = verify_reset_password_token(token)
+        payload = verify_specific_token(token=token, type='reset_password')
 
         if not payload:
             raise ValidationError(

@@ -36,21 +36,28 @@ def update_password(user, new_password):
         raise ValidationError(e)
 
 
-def generate_reset_password_token(user):
+def generate_specific_token(user, type):
+    """
+    For specific actions, generate a specific token for the submitted user.
+    This is not used for authentication.
+    """
     payload = {
         'user_id': user.id,
         'email': user.email,
-        'exp': datetime.now() + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
-        'type': 'password_reset'
+        'exp': datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+        'type': type
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
     return token
 
 
-def verify_reset_password_token(token):
+def verify_specific_token(token, type):
+    """
+    Verify that specific token by checking the type, expiration and validation.
+    """
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        if payload['type'] != 'password_reset':
+        if payload['type'] != type:
             return None
         return payload
     except jwt.ExpiredSignatureError:
