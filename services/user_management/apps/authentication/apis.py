@@ -35,6 +35,9 @@ class AttendeeRegisterApi(APIView):
 
         tokens = generate_jwt_tokens(user)
 
+        send_email_via_rpc(
+            user.email, 'wellcome', 'wellcome to our platform')
+
         data = AttendeeUserDetailApi.OutputAttendeeSerializer(user).data
         data.update(tokens)
         return Response(data=data)
@@ -53,9 +56,6 @@ class LoginApi(APIView):
 
         if not user:
             raise AuthenticationFailed()
-
-        send_email_via_rpc(
-            user.email, 'wellcome', 'wellcome to our platform')
 
         tokens = generate_jwt_tokens(user)
 
@@ -82,7 +82,9 @@ class CustomRefreshTokenApi(APIView):
         try:
             token = RefreshToken(refresh_token)
             user_id = token['user_id']
-            user = get_user_by_id(user_id)
+            role = token['role']
+
+            user = get_user_by_id(user_id, role)
 
             if user:
                 blacklist_refreshtoken(refresh_token)
