@@ -1,5 +1,4 @@
 from .selectors import get_user_by_identifier
-from rest_framework_simplejwt.tokens import RefreshToken
 from .redis_client import redis_client
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
