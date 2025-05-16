@@ -36,16 +36,17 @@ def update_password(user, new_password):
         raise ValidationError(e)
 
 
-def generate_specific_token(user, type):
+def generate_specific_token(email, type, id=None, role=None):
     """
     For specific actions, generate a specific token for the submitted user.
     This is not used for authentication.
     """
     payload = {
-        'user_id': user.id,
-        'email': user.email,
+        'user_id': id,
+        'email': email,
         'exp': datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-        'type': type
+        'type': type,
+        'role': role
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
     return token
