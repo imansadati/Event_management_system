@@ -253,3 +253,43 @@ class InviteUserViaAdminApi(APIView):
         print(invite_url)
 
         return Response({'detail': 'If this email exists, a invite link was sent.'})
+
+
+# validate and creation process
+class AcceptInviteViaAdminApi(APIView):
+    class InputAcceptSerializer(serializers.Serializer):
+        full_name = serializers.CharField(max_length=128)
+        username = serializers.CharField(max_length=128)
+        password = serializers.CharField(min_length=6)
+        work_experience = serializers.IntegerField(required=False)
+        job_title = serializers.CharField(max_length=64, required=False)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputAcceptSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = request.GET.get('token')
+
+        payload = verify_specific_token(token, type='invite_user')
+
+        if not payload:
+            raise ValidationError(
+                detail='Invalid or expired token.', code=status.HTTP_400_BAD_REQUEST)
+
+        username = serializer.validated_data.get('username')
+        full_name = serializer.validated_data.get('full_name')
+        password = serializer.validated_data.get('password')
+
+        role = payload['role']
+        email = payload['email']
+
+        if role == 'staff':
+            job_title = serializer.validated_data.get('job_title')
+            work_experience = serializer.validated_data.get('work_experience')
+            user_staff_create(email=email, username=username, password=password,
+                              full_name=full_name, job_title=job_title, work_experience=work_experience)
+        else:
+            user_admin_create(email=email, username=username,
+                              password=password, full_name=full_name)
+
+        return Response({'detail': 'Account created successfully. now you can login.'})
