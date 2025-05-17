@@ -186,10 +186,9 @@ class ForgotPasswordApi(APIView):
 
         user = get_user_by_email(**serializer.validated_data)
 
-        email = serializer.validated_data.get('email')
         if user:
             token = generate_specific_token(
-                email=email, type='reset_password', role=user.role)
+                email=user.email, id=user.id, type='reset_password', role=user.role)
             reset_url = f'http://localhost:8001/api/auth/reset-password?token={token}'
 
             send_email_via_rpc(recipient=user.email, subject='reset password process',
@@ -202,7 +201,7 @@ class ForgotPasswordApi(APIView):
 # Response to validate token and reset password.
 class ResetPasswordApi(APIView):
     class InputResetSerializer(serializers.Serializer):
-        token = serializers.CharField(max_length=200)
+        token = serializers.CharField(max_length=512)
         new_password = serializers.CharField(min_length=6)
 
     def post(self, request: HttpRequest):
@@ -230,7 +229,8 @@ class ResetPasswordApi(APIView):
 
         update_password(user, new_password)
 
-        blacklist_token(token_type='resetpass_token_blacklist', token=token)
+        blacklist_token(token_type='resetpass_token_blacklist',
+                        token=token, timelife='ACCESS')
 
         return Response({"detail": "Password reset successful."})
 
