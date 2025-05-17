@@ -186,8 +186,10 @@ class ForgotPasswordApi(APIView):
 
         user = get_user_by_email(**serializer.validated_data)
 
+        email = serializer.validated_data.get('email')
         if user:
-            token = generate_specific_token(user=user, type='reset_password')
+            token = generate_specific_token(
+                email=email, type='reset_password', role=user.role)
             reset_url = f'http://localhost:8001/api/auth/reset-password?token={token}'
 
             send_email_via_rpc(recipient=user.email, subject='reset password process',
