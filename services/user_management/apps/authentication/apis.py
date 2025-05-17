@@ -1,5 +1,5 @@
 from rest_framework.views import APIView
-from apps.users.services import user_attendee_create
+from apps.users.services import user_attendee_create, user_staff_create, user_admin_create
 from rest_framework import serializers, status
 from apps.users.models import AttendeeUser
 from django.http import HttpRequest
@@ -223,3 +223,33 @@ class ResetPasswordApi(APIView):
         update_password(user, new_password)
 
         return Response({"detail": "Password reset successful."})
+
+
+# Sent invite via email to invite new staff/admin
+class InviteUserViaAdminApi(APIView):
+    class InputInviteSerializer(serializers.Serializer):
+        role = serializers.ChoiceField(
+            choices=[('admin', 'Admin'), ('staff', 'Staff')])
+        email = serializers.EmailField(max_length=128)
+
+    def post(self, request: HttpRequest):
+        serializer = self.InputInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        role = serializer.validated_data['role']
+        email = serializer.validated_data['email']
+
+        user = get_user_by_email(email)
+
+        if user:
+            raise ValidationError(
+                detail='This user already exist.', code=status.HTTP_400_BAD_REQUEST)
+
+        token = generate_specific_token(email, 'invite_user', role=role)
+        invite_url = f'http://localhost:8001/api/auth/accept-invite?token={token}'
+
+        send_email_via_rpc(recipient=email, subject='invite user',
+                           body=f'Click on this url to continue change signup: {invite_url}')
+        print(invite_url)
+
+        return Response({'detail': 'If this email exists, a invite link was sent.'})
