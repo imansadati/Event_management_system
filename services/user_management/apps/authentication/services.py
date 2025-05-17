@@ -16,15 +16,15 @@ def authenticate_user(identifier: str, password: str):
     return user
 
 
-def is_refreshtoken_blacklisted(refresh_token):
+def is_token_blacklisted(token, token_type):
     """Check if the given token is blacklisted in Redis."""
-    return redis_client.exists(f'blacklist:{refresh_token}')
+    return redis_client.exists(f'{token_type}:{token}')
 
 
-def blacklist_refreshtoken(refresh_token):
-    """store refresh token in blacklist redis."""
+def blacklist_token(token_type, token, timelife):
+    """store token in blacklist redis."""
     redis_client.setex(
-        f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
+        f'{token_type}:{token}', int(settings.SIMPLE_JWT[f'{timelife}_TOKEN_LIFETIME'].total_seconds()), '1')
 
 
 @transaction.atomic
