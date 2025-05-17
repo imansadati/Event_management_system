@@ -16,15 +16,15 @@ def authenticate_user(identifier: str, password: str):
     return user
 
 
-def is_refreshtoken_blacklisted(refresh_token):
+def is_token_blacklisted(token, token_type):
     """Check if the given token is blacklisted in Redis."""
-    return redis_client.exists(f'blacklist:{refresh_token}')
+    return redis_client.exists(f'{token_type}:{token}')
 
 
-def blacklist_refreshtoken(refresh_token):
-    """store refresh token in blacklist redis."""
+def blacklist_token(token_type, token, timelife):
+    """store token in blacklist redis."""
     redis_client.setex(
-        f'blacklist:{refresh_token}', int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()), '1')
+        f'{token_type}:{token}', int(settings.SIMPLE_JWT[f'{timelife}_TOKEN_LIFETIME'].total_seconds()), '1')
 
 
 @transaction.atomic
@@ -36,21 +36,29 @@ def update_password(user, new_password):
         raise ValidationError(e)
 
 
-def generate_reset_password_token(user):
+def generate_specific_token(email, type, id=None, role=None):
+    """
+    For specific actions, generate a specific token for the submitted user.
+    This is not used for authentication.
+    """
     payload = {
-        'user_id': user.id,
-        'email': user.email,
-        'exp': datetime.now() + settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'],
-        'type': 'password_reset'
+        'user_id': id,
+        'email': email,
+        'exp': datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+        'type': type,
+        'role': role
     }
     token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256')
     return token
 
 
-def verify_reset_password_token(token):
+def verify_specific_token(token, type):
+    """
+    Verify that specific token by checking the type, expiration and validation.
+    """
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
-        if payload['type'] != 'password_reset':
+        if payload['type'] != type:
             return None
         return payload
     except jwt.ExpiredSignatureError:
