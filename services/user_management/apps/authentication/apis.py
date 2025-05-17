@@ -6,8 +6,8 @@ from django.http import HttpRequest
 from apps.users.apis import AttendeeUserDetailApi
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed, ValidationError, NotFound
-from .services import (authenticate_user, blacklist_refreshtoken,
-                       is_refreshtoken_blacklisted, update_password, generate_specific_token,
+from .services import (authenticate_user, blacklist_token,
+                       is_token_blacklisted, update_password, generate_specific_token,
                        verify_specific_token)
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import ExpiredTokenError
@@ -75,7 +75,7 @@ class CustomRefreshTokenApi(APIView):
         if not refresh_token:
             raise ValidationError(detail='Refresh token is required.')
 
-        if is_refreshtoken_blacklisted(refresh_token):
+        if is_token_blacklisted(token=refresh_token, token_type='refresh_token_blacklist'):
             raise AuthenticationFailed(
                 detail='Token is blacklisted. Please log in again.')
 
@@ -87,7 +87,8 @@ class CustomRefreshTokenApi(APIView):
             user = get_user_by_id(user_id, role)
 
             if user:
-                blacklist_refreshtoken(refresh_token)
+                blacklist_token(
+                    token=refresh_token, token_type='refresh_token_blacklist', timelife='REFRESH')
                 new_token = generate_jwt_tokens(user)
                 return Response({
                     'access_token': new_token['access_token'],
@@ -107,13 +108,14 @@ class LogoutApi(APIView):
         if not refresh_token:
             raise ValidationError('Refresh token is required')
 
-        if is_refreshtoken_blacklisted(refresh_token):
+        if is_token_blacklisted(token=refresh_token, token_type='logout_token_blacklist'):
             raise AuthenticationFailed(
                 detail='Token is blacklisted. Please log in again.')
 
         try:
             token = RefreshToken(refresh_token)
-            blacklist_refreshtoken(token)
+            blacklist_token(
+                token=token, token_type='logout_token_blacklist', timelife='REFRESH')
             return Response({"message": "Successfully logged out."}, status=200)
 
         except ExpiredTokenError:
@@ -157,10 +159,11 @@ class ChangePasswordApi(APIView):
         try:
             refresh_token = RefreshToken(refresh_token)
 
-            if not is_refreshtoken_blacklisted(refresh_token):
+            if not is_token_blacklisted(token=refresh_token, token_type='changepass_token_blacklist'):
                 update_password(user, new_password)
 
-                blacklist_refreshtoken(refresh_token)
+                blacklist_token(
+                    token=refresh_token, token_type='changepass_token_blacklist', timelife='REFRESH')
                 return Response({"detail": "Password changed successfully. Please log in again."}, status=status.HTTP_200_OK)
             raise AuthenticationFailed(
                 detail='Token is blacklisted. Please log in again.')
@@ -207,6 +210,9 @@ class ResetPasswordApi(APIView):
         token = serializer.validated_data['token']
         new_password = serializer.validated_data['new_password']
 
+        if is_token_blacklisted(token_type='resetpass_token_blacklist', token=token):
+            raise ValidationError('Token is blacklisted.')
+
         payload = verify_specific_token(token=token, type='reset_password')
 
         if not payload:
@@ -221,6 +227,8 @@ class ResetPasswordApi(APIView):
                            code=status.HTTP_404_NOT_FOUND)
 
         update_password(user, new_password)
+
+        blacklist_token(token_type='resetpass_token_blacklist', token=token)
 
         return Response({"detail": "Password reset successful."})
 
@@ -270,6 +278,9 @@ class AcceptInviteViaAdminApi(APIView):
 
         token = request.GET.get('token')
 
+        if is_token_blacklisted(token_type='invite_token_blacklist', token=token):
+            raise ValidationError('Token is blacklisted.')
+
         payload = verify_specific_token(token, type='invite_user')
 
         if not payload:
@@ -291,5 +302,8 @@ class AcceptInviteViaAdminApi(APIView):
         else:
             user_admin_create(email=email, username=username,
                               password=password, full_name=full_name)
+
+        blacklist_token(token_type='invite_token_blacklist',
+                        token=token, timelife='ACCESS')
 
         return Response({'detail': 'Account created successfully. now you can login.'})
