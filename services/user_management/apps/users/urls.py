@@ -3,7 +3,7 @@ from .apis import (AdminUserListApi, StaffUserListApi, AttendeeUserListApi,
                    AdminUserDetailApi, StaffUserDetailApi, AttendeeUserDetailApi,
                    AdminUserCreateApi, StaffUserCreateApi, AttendeeUserCreateApi,
                    AdminUserUpdateApi, StaffUserUpdateApi, AttendeeUserUpdateApi,
-                   AdminUserDeleteApi,)
+                   AdminUserDeleteApi, StaffUserDeleteApi)
 urlpatterns = [
     path('admins/', AdminUserListApi.as_view(), name='admin_user_list'),
     path('staff/', StaffUserListApi.as_view(), name='staff_user_list'),
@@ -25,5 +25,7 @@ urlpatterns = [
     path('attendee/<int:user_id>/update',
          AttendeeUserUpdateApi.as_view(), name='attendee_user_update'),
     path('admin/<int:user_id>/delete/', AdminUserDeleteApi.as_view(),
-         name='admin_user_delete')
+         name='admin_user_delete'),
+    path('staff/<int:user_id>/delete/', StaffUserDeleteApi.as_view(),
+         name='staff_user_delete')
 ]
