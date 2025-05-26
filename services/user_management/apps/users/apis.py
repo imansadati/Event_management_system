@@ -368,3 +368,15 @@ class StaffUserDeleteApi(APIView):
         user.delete()
 
         return Response({'detail': f'This user with {user_id} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
+class AttendeeUserDeleteApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
+    def post(self, request: HttpRequest, user_id):
+        user = user_attendee_get(user_id)
+
+        user.delete()
+
+        return Response({'detail': f'This user with {user_id} id successfully deleted.'}, status=status.HTTP_200_OK)
