@@ -177,6 +177,9 @@ class AttendeeUserDetailApi(APIView):
 
 
 class AdminUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputAdminSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
@@ -194,6 +197,9 @@ class AdminUserCreateApi(APIView):
 
 
 class StaffUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputStaffSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
@@ -213,6 +219,9 @@ class StaffUserCreateApi(APIView):
 
 
 class AttendeeUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class InputAttendeeSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
