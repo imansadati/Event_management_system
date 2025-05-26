@@ -14,7 +14,7 @@ from rest_framework_simplejwt.exceptions import ExpiredTokenError
 from .selectors import get_user_by_id, get_user_by_email, get_user_by_email_and_id
 from grpc_service.client.client import send_email_via_rpc
 from .tokens import generate_jwt_tokens
-from shared_utils.permissions import IsAuthenticatedViaJWT
+from shared_utils.permissions import IsAuthenticatedViaJWT, HasRolePermission
 
 
 # just attendees can signup themselves as regular user. for other type of users admin must create. admin -> staff
@@ -237,6 +237,9 @@ class ResetPasswordApi(APIView):
 
 # Sent invite via email to invite new staff/admin
 class InviteUserViaAdminApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputInviteSerializer(serializers.Serializer):
         role = serializers.ChoiceField(
             choices=[('admin', 'Admin'), ('staff', 'Staff')])
@@ -267,6 +270,9 @@ class InviteUserViaAdminApi(APIView):
 
 # validate and creation process
 class AcceptInviteViaAdminApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputAcceptSerializer(serializers.Serializer):
         full_name = serializers.CharField(max_length=128)
         username = serializers.CharField(max_length=128)
