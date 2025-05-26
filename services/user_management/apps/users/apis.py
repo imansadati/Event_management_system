@@ -119,6 +119,9 @@ class AttendeeUserListApi(APIView):
 
 
 class AdminUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class OutputAdminSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
@@ -134,6 +137,9 @@ class AdminUserDetailApi(APIView):
 
 
 class StaffUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class OutputStaffSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
@@ -153,6 +159,9 @@ class StaffUserDetailApi(APIView):
 
 
 class AttendeeUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class OutputAttendeeSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
