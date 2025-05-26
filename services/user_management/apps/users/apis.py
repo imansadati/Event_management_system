@@ -5,12 +5,16 @@ from django.http import HttpRequest, Http404
 from .selectors import user_admin_list, user_staff_list, user_attendee_list, user_admin_get, user_staff_get, user_attendee_get
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
+from shared_utils.permissions import IsAuthenticatedViaJWT, HasRolePermission
 from rest_framework.response import Response
 from .services import user_admin_create, user_staff_create, user_attendee_create, user_admin_update, user_staff_update, user_attendee_update
 from rest_framework.exceptions import ValidationError
 
 
 class AdminUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 5
 
@@ -42,6 +46,9 @@ class AdminUserListApi(APIView):
 
 
 class StaffUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 2
 
@@ -76,6 +83,9 @@ class StaffUserListApi(APIView):
 
 
 class AttendeeUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 2
 
