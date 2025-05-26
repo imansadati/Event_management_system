@@ -344,3 +344,39 @@ class AttendeeUserUpdateApi(APIView):
             if e.get_codes() == ["no_content"]:
                 return Response({"detail": "No changes detected. User data remains the same."}, status=status.HTTP_204_NO_CONTENT)
             return Response({"errors": e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminUserDeleteApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
+    def post(self, request: HttpRequest, user_id):
+        user = user_admin_get(user_id)
+
+        user.delete()
+
+        return Response({'detail': f'This user with {user_id} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
+class StaffUserDeleteApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
+    def post(self, request: HttpRequest, user_id):
+        user = user_staff_get(user_id)
+
+        user.delete()
+
+        return Response({'detail': f'This user with {user_id} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
+class AttendeeUserDeleteApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
+    def post(self, request: HttpRequest, user_id):
+        user = user_attendee_get(user_id)
+
+        user.delete()
+
+        return Response({'detail': f'This user with {user_id} id successfully deleted.'}, status=status.HTTP_200_OK)
