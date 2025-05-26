@@ -5,12 +5,16 @@ from django.http import HttpRequest, Http404
 from .selectors import user_admin_list, user_staff_list, user_attendee_list, user_admin_get, user_staff_get, user_attendee_get
 # read ./shared_utils/README.md
 from shared_utils.pagination import LimitOffsetPagination, get_paginated_response
+from shared_utils.permissions import IsAuthenticatedViaJWT, HasRolePermission
 from rest_framework.response import Response
 from .services import user_admin_create, user_staff_create, user_attendee_create, user_admin_update, user_staff_update, user_attendee_update
 from rest_framework.exceptions import ValidationError
 
 
 class AdminUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 5
 
@@ -42,6 +46,9 @@ class AdminUserListApi(APIView):
 
 
 class StaffUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 2
 
@@ -76,6 +83,9 @@ class StaffUserListApi(APIView):
 
 
 class AttendeeUserListApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class Pagination(LimitOffsetPagination):
         default_limit = 2
 
@@ -109,6 +119,9 @@ class AttendeeUserListApi(APIView):
 
 
 class AdminUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class OutputAdminSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
@@ -124,6 +137,9 @@ class AdminUserDetailApi(APIView):
 
 
 class StaffUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class OutputStaffSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
@@ -143,6 +159,9 @@ class StaffUserDetailApi(APIView):
 
 
 class AttendeeUserDetailApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class OutputAttendeeSerializer(serializers.Serializer):
         id = serializers.IntegerField()
         username = serializers.CharField(max_length=128)
@@ -158,6 +177,9 @@ class AttendeeUserDetailApi(APIView):
 
 
 class AdminUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputAdminSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
@@ -175,6 +197,9 @@ class AdminUserCreateApi(APIView):
 
 
 class StaffUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputStaffSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
@@ -194,6 +219,9 @@ class StaffUserCreateApi(APIView):
 
 
 class AttendeeUserCreateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class InputAttendeeSerializer(serializers.Serializer):
         email = serializers.EmailField()
         password = serializers.CharField(max_length=128)
@@ -211,6 +239,9 @@ class AttendeeUserCreateApi(APIView):
 
 
 class AdminUserUpdateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputAdminSerializer(serializers.Serializer):
         full_name = serializers.CharField(max_length=128)
         email = serializers.EmailField()
@@ -243,6 +274,9 @@ class AdminUserUpdateApi(APIView):
 
 
 class StaffUserUpdateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin']
+
     class InputStaffSerializer(serializers.Serializer):
         full_name = serializers.CharField(max_length=128)
         email = serializers.EmailField()
@@ -277,6 +311,9 @@ class StaffUserUpdateApi(APIView):
 
 
 class AttendeeUserUpdateApi(APIView):
+    permission_classes = [IsAuthenticatedViaJWT, HasRolePermission]
+    HasRolePermission.required_roles = ['admin', 'staff']
+
     class InputAttendeeSerializer(serializers.Serializer):
         full_name = serializers.CharField(max_length=128)
         email = serializers.EmailField()
