@@ -127,6 +127,15 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "apps.authentication.jwt_authentication.CustomJWTAuthentication",
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'apps.authentication.security.throttling.custom_throttling.RoleBasedRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # role_based doesn’t matter much because our dynamic logic will override it.
+        'role_based': '10000/day',
+        'anon': '50/hour',  # for anonymous
+    }
 }
 
 SIMPLE_JWT = {
