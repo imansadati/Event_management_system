@@ -1,0 +1,36 @@
+# # Ignore logs and temporary files
+*.log
+*.tmp
+*.bak
+*.~*
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# static and media files
+/app/static
+/app/media
+
+# Virtual environment
+venv/
+env/
+
+# IDE/Editor configurations & Git
+*.idea/
+*.swp
+.git/
+.gitignore
+
+# System files
+*.DS_Store
+Thumbs.db
+
+# Build and distribution directories
+build/
+dist/
+
+LICENSE
+
+README.md

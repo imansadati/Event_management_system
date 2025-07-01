@@ -1,5 +1,5 @@
 # for more detail about this base image: https://hub.docker.com/r/imansadatii/python-base
-FROM imansadatii/python-base:1.0
+FROM imansadatii/python-base:1.1
 
 WORKDIR /app/
 

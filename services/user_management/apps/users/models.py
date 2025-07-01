@@ -47,6 +47,7 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=128, db_index=True)
     email = models.EmailField(unique=True, db_index=True)
     date_joined = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
 
     groups = models.ManyToManyField(
         'auth.Group',
@@ -63,12 +64,18 @@ class BaseUser(AbstractBaseUser, PermissionsMixin):
 
     objects = BaseUserManager()
 
-    def save(self, *args, **kwargs):
-        self.set_password(self.password)
-        return super().save(*args, **kwargs)
-
     class Meta:
         abstract = True
+
+    @property
+    def role(self):
+        if getattr(self, 'is_admin', False):
+            return 'admin'
+        elif getattr(self, 'is_staff', False):
+            return 'staff'
+        elif getattr(self, 'is_attendee', False):
+            return 'attendee'
+        return 'unknown'
 
 
 class AdminUser(BaseUser):
@@ -100,11 +107,12 @@ class AttendeeUser(BaseUser):
 
 
 class StaffUser(BaseUser):
-    profile = models.OneToOneField('Profile', on_delete=models.CASCADE)
+    profile = models.OneToOneField(
+        'Profile', on_delete=models.CASCADE, null=True, blank=True)
     is_staff = models.BooleanField(default=True)
     job_title = models.CharField(max_length=64)
     availability_status = models.CharField(
-        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')])
+        max_length=32, choices=[('available', 'Available'), ('busy', 'Busy')], default='available')
     work_experience = models.SmallIntegerField()
 
     class Meta:
