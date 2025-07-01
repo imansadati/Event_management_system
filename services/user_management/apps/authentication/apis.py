@@ -121,7 +121,7 @@ class LogoutApi(APIView):
         except ExpiredTokenError:
             raise AuthenticationFailed(
                 detail='Refresh token has expired. Please log in again.')
-
+ 
 
 class ChangePasswordApi(APIView):
     permission_classes = [IsAuthenticatedViaJWT]
