@@ -21,11 +21,11 @@ class RoleBasedRateThrottle(UserRateThrottle):
         # Dynamically decide rate based on role
         if hasattr(request.user, 'role'):
             if request.user.role == 'admin':
-                self.rate = '1/day'
+                self.rate = '1000/day'  # change this for your needed.
             elif request.user.role == 'staff':
-                self.rate = '1/day'
+                self.rate = '1000/day'  # change this for your needed.
             elif request.user.role == 'attendee':
-                self.rate = '1/day'
+                self.rate = '1000/day'  # change this for your needed.
             else:
                 self.rate = None
         else:
