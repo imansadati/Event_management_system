@@ -14,6 +14,19 @@ services:
       - "5433:5432"
     restart: always
 
+  event_management_db:
+    image: postgres:17.2
+    container_name: event_management_db
+    networks:
+      - main
+    volumes:
+      - event_db_data:/var/lib/postgresql/data
+    env_file:
+      - ./services/event_management/postgres.env
+    ports:
+      - "5435:5432"
+    restart: always
+
   notification_system_db:
     image: postgres:17.2
     container_name: notification_system_db
@@ -25,6 +38,26 @@ services:
       - ./services/notification_system/postgres.env
     ports:
       - "5434:5432"
+    restart: always
+  
+  user_management:
+    build:
+      context: ./services/user_management
+      dockerfile: Dockerfile
+    image: user_management:1.0
+    container_name: user_management
+    volumes:
+      - ./services/user_management:/app/
+      - static:/app/static
+      - media:/app/media
+    networks:
+      - main
+    depends_on:
+      - user_management_db
+    env_file:
+      - ./services/user_management/.env
+    ports:
+      - "8001:8000"
     restart: always
 
   notification:
@@ -69,24 +102,24 @@ services:
       - ./services/notification_system/.env
     restart: always
 
-  user_management:
+  event_management:
     build:
-      context: ./services/user_management
+      context: ./services/event_management
       dockerfile: Dockerfile
-    image: user_management:1.0
-    container_name: user_management
+    image: event_management:1.0
+    container_name: event_management
     volumes:
-      - ./services/user_management:/app/
+      - ./services/event_management:/app/
       - static:/app/static
       - media:/app/media
     networks:
       - main
     depends_on:
-      - user_management_db
+      - event_management_db
     env_file:
-      - ./services/user_management/.env
+      - ./services/event_management/.env
     ports:
-      - "8001:8000"
+      - "8003:8000"
     restart: always
 
   nginx:
@@ -103,6 +136,7 @@ services:
     depends_on:
       - user_management_db
       - notification_system_db
+      - event_management_db
     restart: always
 
   redis:
@@ -130,6 +164,7 @@ services:
 volumes:
   notification_db_data:
   user_db_data:
+  event_db_data:
   static:
   media:
 
