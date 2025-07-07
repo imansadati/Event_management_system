@@ -25,7 +25,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-
+    'apps.events.apps.EventsConfig'
 ]
 
 INSTALLED_APPS = [
