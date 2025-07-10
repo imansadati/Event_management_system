@@ -17,3 +17,8 @@ class EventListApi(APIView):
         data = event_list()
         serializer = self.OutputEventListSerializer(data, many=True).data
         return Response(serializer)
+
+
+class EventGetwayApiViewSet(ViewSet):
+    def list(self, request):
+        return EventListApi.as_view()(request._request)
