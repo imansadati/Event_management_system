@@ -16,8 +16,16 @@ class EventListApi(APIView):
             model = Event
             fields = '__all__'
 
+    class FilterEventSerializer(serializers.Serializer):
+        title = serializers.CharField(max_length=128, required=False)
+        type = serializers.CharField(max_length=16, required=False)
+
     def get(self, request: HttpRequest):
-        events = event_list()
+        filter_serializers = self.FilterEventSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        events = event_list(filters=filter_serializers.validated_data)
 
         return get_paginated_response(
             pagination_class=self.Pagination,
