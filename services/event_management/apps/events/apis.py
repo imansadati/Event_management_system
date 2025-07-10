@@ -52,9 +52,22 @@ class EventDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class EventCreateApi(APIView):
+    class InputEventSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Event
+            exclud = ['type', 'published_at', 'created_at']
+
+    def post(self, reqeust: HttpRequest):
+        pass
+
+
 class EventGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventListApi.as_view()(request._request)
 
     def retrieve(self, request: HttpRequest, pk=None):
         return EventDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return EventCreateApi.as_view()(request._request)
