@@ -1,4 +1,26 @@
 from django.db import models
+from django.utils import timezone
+
+
+class EventManager(models.Manager):
+    def create_event(self, **kwargs):
+        now = timezone.now()
+
+        kwargs.setdefault('status', 'draft')
+        kwargs.setdefault('type', 'public')
+        kwargs.setdefault('gallery', [])
+
+        published_at = kwargs.get('published_at')
+        status = kwargs['status']
+
+        if status == 'published' and not published_at:
+            kwargs['published_at'] = now
+
+        event = self.model(**kwargs)
+
+        event.full_clean()
+        event.save(using=self._db)
+        return event
 
 
 class Event(models.Model):
@@ -31,6 +53,8 @@ class Event(models.Model):
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    objects = EventManager()
 
     class Meta:
         ordering = ['-start_datetime']
