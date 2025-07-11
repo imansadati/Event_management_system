@@ -58,6 +58,13 @@ class EventCreateApi(APIView):
             model = Event
             exclud = ['type', 'published_at', 'created_at']
 
+        def validate(self, data):
+            if data['start_datetime'] >= data['end_datetime']:
+                raise serializers.ValidationError(
+                    'start_datetime must be before end_datetime'
+                )
+            return data
+
     def post(self, reqeust: HttpRequest):
         pass
 
