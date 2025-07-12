@@ -8,7 +8,7 @@ def publsih_event_task(self, event_id):
     try:
         event = event_get(event_id)
         if event.status != 'published' and event.published_at <= timezone.now():
-            event.status == 'published'
+            event.status = 'published'
             event.save(update_fields=['status'])
 
     except Exception as e:

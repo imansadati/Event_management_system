@@ -13,7 +13,7 @@ def event_create(**kwargs):
     event = Event.objects.create_event(**kwargs)
 
     if published_at:
-        if published_at > now:
+        if published_at >= now:
             kwargs['status'] = 'archived'  # keep archived until publish timet
             # scheduled a background task to publish event
             publsih_event_task.apply_async(
