@@ -18,4 +18,4 @@ app.conf.task_routes = (
     )
 )
 
-app.autodiscover_tasks()
+app.autodiscover_tasks(['apps.events'])
