@@ -24,4 +24,5 @@ app.conf.beat_schedule = {
     }
 }
 
-app.autodiscover_tasks(['apps.notifications'])
+app.conf.task_default_queue = 'email_queue'
+app.autodiscover_tasks(['apps.notification'])
