@@ -74,7 +74,7 @@ class EventCreateApi(APIView):
         serializer.is_valid(raise_exception=True)
 
         event = event_create(**serializer.validated_data)
-        print('iman sadatiiiiiiiiiiiiiiiiiiii')
+
         data = EventDetailApi.OutputEventSerializer(event).data
         return Response(data, status=status.HTTP_201_CREATED)
 
