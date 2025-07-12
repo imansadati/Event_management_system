@@ -24,4 +24,4 @@ app.conf.beat_schedule = {
     }
 }
 
-app.autodiscover_tasks()
+app.autodiscover_tasks(['apps.notifications'])
