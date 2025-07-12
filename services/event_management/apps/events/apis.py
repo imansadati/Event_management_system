@@ -7,6 +7,8 @@ from .selectors import event_list, event_get
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
+from .services import event_create
+from rest_framework.exceptions import ValidationError
 
 
 class EventListApi(APIView):
@@ -56,10 +58,25 @@ class EventCreateApi(APIView):
     class InputEventSerializer(serializers.ModelSerializer):
         class Meta:
             model = Event
-            exclud = ['type', 'published_at', 'created_at']
+            exclude = ['status', 'created_at', 'updated_at']
+            extra_kwargs = {'category': {'required': True}}
+            extra_kwargs = {'published_at': {'required': True}}
+
+        def validate(self, data):
+            if data['start_datetime'] >= data['end_datetime']:
+                raise ValidationError(
+                    {'start_datetime': 'start_datetime must be before end_datetime'}
+                )
+            return data
 
     def post(self, reqeust: HttpRequest):
-        pass
+        serializer = self.InputEventSerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        event = event_create(**serializer.validated_data)
+
+        data = EventDetailApi.OutputEventSerializer(event).data
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class EventGetwayApiViewSet(ViewSet):

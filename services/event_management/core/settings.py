@@ -74,10 +74,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME', 'postgres'),
-        'USER': os.getenv('DB_USER', 'postgres'),
-        'PASSWORD': os.getenv('DB_PASSWORD', 'postgres'),
-        'HOST': os.getenv('DB_HOST', 'db'),
+        'NAME': os.getenv('DB_NAME', 'event_postgres'),
+        'USER': os.getenv('DB_USER', 'event_postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'event_postgres'),
+        'HOST': os.getenv('DB_HOST', 'event_management_db'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
@@ -118,3 +118,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
 }
+
+CELERY_BROKER_URL = os.environ.get(
+    "CELERY_BROKER_URL", "amqp://guest:guest@rabbitmq:5672/")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_ENABLE_UTC = True

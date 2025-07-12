@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 def event_list(*, filters):
     filters = filters or {}
 
-    qs = Event.objects.all()
+    qs = Event.objects.filter(status='published')
     return EventFilter(filters, qs).qs
 
 
