@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
-from .models import Event
+from .models import Event, EventCategory
 from .selectors import event_list, event_get
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
@@ -82,6 +82,16 @@ class EventCreateApi(APIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
+class EventUpdateApi(APIView):
+    class InputEventSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Event
+            fields = ['title', 'capacity']  # add more if needed
+
+    def post(self, request: HttpRequest):
+        pass
+
+
 class EventGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventListApi.as_view()(request._request)
@@ -91,3 +101,9 @@ class EventGetwayApiViewSet(ViewSet):
 
     def create(self, request: HttpRequest):
         return EventCreateApi.as_view()(request._request)
+
+    def update(self, request: HttpRequest, pk=None):
+        return EventCreateApi.as_view()(request._request, pk=None)
+
+    def partial_update(self, request: HttpRequest, pk=None):
+        return EventCreateApi.as_view()(request._request, pk=None)
