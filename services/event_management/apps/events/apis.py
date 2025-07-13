@@ -88,6 +88,15 @@ class EventUpdateApi(APIView):
             model = Event
             fields = ['title', 'capacity']  # add more if needed
 
+        # check the user does not enter additional fields
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
     def post(self, request: HttpRequest):
         pass
 
