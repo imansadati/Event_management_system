@@ -19,3 +19,7 @@ def event_category_list(*, filters):
 
     qs = EventCategory.objects.filter(is_active=True)
     return EventCategoryFilter(filters, qs).qs
+
+
+def event_category_get(category_id):
+    return get_object_or_404(EventCategory, id=category_id)

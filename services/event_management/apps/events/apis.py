@@ -3,7 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get, event_category_list
+from .selectors import event_list, event_get, event_category_list, event_category_get
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -177,6 +177,23 @@ class EventCategoryListApi(APIView):
         )
 
 
+class EventCategoryDetailApi(APIView):
+    class OutputEventCategorySerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventCategory
+            exclude = ['created_at', 'updated_at']
+
+    def get(self, request: HttpRequest, pk):
+        category = event_category_get(pk)
+
+        data = self.OutputEventCategorySerializer(category).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class EventCategoryGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventCategoryListApi.as_view()(request._request)
+
+    def retrieve(self, request: HttpRequest, pk=None):
+        return EventCategoryDetailApi.as_view()(request._request, pk=pk)
