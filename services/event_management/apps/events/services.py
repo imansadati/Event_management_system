@@ -52,3 +52,17 @@ def event_category_create(**kwargs):
     category.save()
 
     return category
+
+
+def event_category_update(*, category: EventCategory, data):
+    non_side_effect_fields = [
+        'title',
+    ]
+
+    try:
+        updated_category = model_update(
+            instance=category, fields=non_side_effect_fields, data=data
+        )
+        return updated_category
+    except ValidationError as e:
+        raise e

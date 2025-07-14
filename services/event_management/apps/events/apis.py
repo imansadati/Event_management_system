@@ -7,7 +7,7 @@ from .selectors import event_list, event_get, event_category_list, event_categor
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update, event_category_create
+from .services import event_create, event_update, event_category_create, event_category_update
 from rest_framework.exceptions import ValidationError
 
 
@@ -106,7 +106,6 @@ class EventUpdateApi(APIView):
     def update_event(self, request: HttpRequest, pk):
         serializer = self.InputEventSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        print(pk)
 
         event = event_get(pk)
         try:
@@ -216,6 +215,42 @@ class EventCategoryCreateApi(APIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
+class EventCategoryUpdateApi(APIView):
+    class InputEventCategorySerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventCategory
+            fields = ['title']
+
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def put(self, request: HttpRequest, pk):
+        return self.update_event_category(request, pk)
+
+    def patch(self, request: HttpRequest, pk):
+        return self.update_event_category(request, pk)
+
+    def update_event_category(self, request: HttpRequest, pk):
+        serializer = self.InputEventCategorySerializer(
+            data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        category = event_category_get(pk)
+        try:
+            updated_category = event_category_update(
+                category=category, data=serializer.validated_data)
+            return Response(EventCategoryDetailApi.OutputEventCategorySerializer(updated_category).data, status=status.HTTP_200_OK)
+        except Exception as e:
+            if e.get_codes() == ['no_content']:
+                return Response({'detail': 'No changes detected. event category data remains the same.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class EventCategoryGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventCategoryListApi.as_view()(request._request)
@@ -225,3 +260,9 @@ class EventCategoryGetwayApiViewSet(ViewSet):
 
     def create(self, request: HttpRequest):
         return EventCategoryCreateApi.as_view()(request._request)
+
+    def update(self, request: HttpRequest, pk=None):
+        return EventCategoryUpdateApi.as_view()(request._request, pk=pk)
+
+    def partial_update(self, request: HttpRequest, pk=None):
+        return EventCategoryUpdateApi.as_view()(request._request, pk=pk)
