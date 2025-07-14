@@ -7,7 +7,7 @@ from .selectors import event_list, event_get
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create
+from .services import event_create, event_update
 from rest_framework.exceptions import ValidationError
 
 
@@ -97,8 +97,26 @@ class EventUpdateApi(APIView):
                     {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
             return data
 
-    def post(self, request: HttpRequest):
-        pass
+    def put(self, request: HttpRequest, pk):
+        return self.update_event(request, pk)
+
+    def patch(self, request: HttpRequest, pk):
+        return self.update_event(request, pk)
+
+    def update_event(self, request: HttpRequest, pk):
+        serializer = self.InputEventSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        print(pk)
+
+        event = event_get(pk)
+        try:
+            updated_event = event_update(
+                event=event, data=serializer.validated_data)
+            return Response(EventDetailApi.OutputEventSerializer(updated_event).data, status=status.HTTP_200_OK)
+        except Exception as e:
+            if e.get_codes() == ['no_content']:
+                return Response({'detail': 'No changes detected. event data remains the same.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EventGetwayApiViewSet(ViewSet):
@@ -112,7 +130,7 @@ class EventGetwayApiViewSet(ViewSet):
         return EventCreateApi.as_view()(request._request)
 
     def update(self, request: HttpRequest, pk=None):
-        return EventCreateApi.as_view()(request._request, pk=None)
+        return EventUpdateApi.as_view()(request._request, pk=pk)
 
     def partial_update(self, request: HttpRequest, pk=None):
-        return EventCreateApi.as_view()(request._request, pk=None)
+        return EventUpdateApi.as_view()(request._request, pk=pk)
