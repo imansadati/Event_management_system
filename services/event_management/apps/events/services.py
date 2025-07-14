@@ -1,7 +1,9 @@
-from .models import Event
+from .models import Event, EventCategory
 from django.db import transaction
 from django.utils import timezone
 from .tasks import publsih_event_task
+from shared_utils.update_model import model_update
+from rest_framework.exceptions import ValidationError
 
 
 @transaction.atomic()
@@ -23,3 +25,44 @@ def event_create(**kwargs):
             kwargs['status'] = 'published'
 
     return event
+
+
+def event_update(*, event: Event, data):
+    non_side_effect_fields = [
+        'title',
+        'capacity'
+    ]
+
+    try:
+        updated_event = model_update(
+            instance=event, fields=non_side_effect_fields, data=data
+        )
+        return updated_event
+    except ValidationError as e:
+        raise e
+
+
+@transaction.atomic()
+def event_category_create(**kwargs):
+    category = EventCategory(
+        **kwargs
+    )
+    category.is_active = True
+    category.full_clean()
+    category.save()
+
+    return category
+
+
+def event_category_update(*, category: EventCategory, data):
+    non_side_effect_fields = [
+        'title',
+    ]
+
+    try:
+        updated_category = model_update(
+            instance=category, fields=non_side_effect_fields, data=data
+        )
+        return updated_category
+    except ValidationError as e:
+        raise e
