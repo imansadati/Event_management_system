@@ -251,6 +251,15 @@ class EventCategoryUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EventCategoryDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        category = event_category_get(pk)
+
+        category.delete()
+
+        return Response({'detail': f'This event category with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class EventCategoryGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventCategoryListApi.as_view()(request._request)
@@ -266,3 +275,6 @@ class EventCategoryGetwayApiViewSet(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return EventCategoryUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return EventCategoryDeleteApi.as_view()(request._request, pk=pk)
