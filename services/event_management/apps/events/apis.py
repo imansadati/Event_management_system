@@ -7,7 +7,7 @@ from .selectors import event_list, event_get, event_category_list, event_categor
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update
+from .services import event_create, event_update, event_category_create
 from rest_framework.exceptions import ValidationError
 
 
@@ -191,9 +191,37 @@ class EventCategoryDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class EventCategoryCreateApi(APIView):
+    class InputEventCategorySerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventCategory
+            fields = '__all__'
+
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def post(self, reqeust: HttpRequest):
+        serializer = self.InputEventCategorySerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        category = event_category_create(**serializer.validated_data)
+
+        data = EventCategoryDetailApi.OutputEventCategorySerializer(
+            category).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
 class EventCategoryGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventCategoryListApi.as_view()(request._request)
 
     def retrieve(self, request: HttpRequest, pk=None):
         return EventCategoryDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return EventCategoryCreateApi.as_view()(request._request)

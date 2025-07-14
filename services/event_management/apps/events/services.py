@@ -1,4 +1,4 @@
-from .models import Event
+from .models import Event, EventCategory
 from django.db import transaction
 from django.utils import timezone
 from .tasks import publsih_event_task
@@ -40,3 +40,15 @@ def event_update(*, event: Event, data):
         return updated_event
     except ValidationError as e:
         raise e
+
+
+@transaction.atomic()
+def event_category_create(**kwargs):
+    category = EventCategory(
+        **kwargs
+    )
+    category.is_active = True
+    category.full_clean()
+    category.save()
+
+    return category
