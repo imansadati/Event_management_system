@@ -119,6 +119,15 @@ class EventUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class EventDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        event = event_get(pk)
+
+        event.delete()
+
+        return Response({'detail': f'This event with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class EventGetwayApiViewSet(ViewSet):
     def list(self, request: HttpRequest):
         return EventListApi.as_view()(request._request)
@@ -134,3 +143,6 @@ class EventGetwayApiViewSet(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return EventUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return EventDeleteApi.as_view()(request._request, pk=pk)
