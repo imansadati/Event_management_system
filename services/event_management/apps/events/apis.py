@@ -3,7 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get
+from .selectors import event_list, event_get, event_category_list
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -146,3 +146,37 @@ class EventGetwayApiViewSet(ViewSet):
 
     def delete(self, request: HttpRequest, pk=None):
         return EventDeleteApi.as_view()(request._request, pk=pk)
+
+
+class EventCategoryListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputEventCategoryListSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventCategory
+            fields = '__all__'
+
+    class FilterEventCategorySerializer(serializers.Serializer):
+        title = serializers.CharField(max_length=64, required=False)
+
+    def get(self, request: HttpRequest):
+        filter_serializers = self.FilterEventCategorySerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        categories = event_category_list(
+            filters=filter_serializers.validated_data)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputEventCategoryListSerializer,
+            queryset=categories,
+            request=request,
+            view=self
+        )
+
+
+class EventCategoryGetwayApiViewSet(ViewSet):
+    def list(self, request: HttpRequest):
+        return EventCategoryListApi.as_view()(request._request)
