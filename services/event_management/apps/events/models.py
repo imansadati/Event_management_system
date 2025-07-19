@@ -1,20 +1,11 @@
 from django.db import models
-from django.utils import timezone
 
 
 class EventManager(models.Manager):
     def create_event(self, **kwargs):
-        now = timezone.now()
-
         kwargs.setdefault('status', 'draft')
         kwargs.setdefault('type', 'public')
         kwargs.setdefault('gallery', [])
-
-        published_at = kwargs.get('published_at')
-        status = kwargs['status']
-
-        if status == 'published' and not published_at:
-            kwargs['published_at'] = now
 
         event = self.model(**kwargs)
 
