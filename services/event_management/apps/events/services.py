@@ -16,13 +16,16 @@ def event_create(**kwargs):
 
     if published_at:
         if published_at >= now:
-            kwargs['status'] = 'archived'  # keep archived until publish timet
+            event.status = 'archived'  # keep archived until publish time
+            event.save(update_fields=['status'])
             # scheduled a background task to publish event
             publsih_event_task.apply_async(
                 args=[event.id], eta=published_at, priority=4)
 
         else:
-            kwargs['status'] = 'published'
+            event.status = 'published'
+            event.published_at = now
+            event.save(update_fields=['status', 'published_at'])
 
     return event
 

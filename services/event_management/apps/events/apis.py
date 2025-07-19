@@ -203,9 +203,6 @@ class EventCreateApi(APIView):
                 raise ValidationError(
                     {'start_datetime': 'start_datetime must be before end_datetime'}
                 )
-            if data.get('type') not in ['public', 'private', 'invite_only']:
-                raise ValidationError({'type': 'Invalid event type'})
-
             return data
 
     def post(self, reqeust: HttpRequest):
