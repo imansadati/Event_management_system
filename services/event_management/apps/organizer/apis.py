@@ -7,6 +7,7 @@ from shared_utils.pagination import get_paginated_response, LimitOffsetPaginatio
 from .selectors import organizer_list, organizer_get
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
+from .services import organizer_create
 
 
 # CRUD
@@ -52,9 +53,30 @@ class OrganizerDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class OrganizerCreateApi(APIView):
+    class InputOrganizerSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Organizer
+            exclude = ['created_at', 'updated_at']
+            extra_kwargs = {'description': {'required': True}}
+            extra_kwargs = {'type': {'required': True}}
+
+    def post(self, reqeust: HttpRequest):
+        serializer = self.InputOrganizerSerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        organizer = organizer_create(**serializer.validated_data)
+
+        data = OrganizerDetailApi.OutputOrganizerSerializer(organizer).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
 class OrganizerGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerListApi.as_view()(request._request)
 
     def retrieve(self, request: HttpRequest, pk=None):
         return OrganizerDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return OrganizerCreateApi.as_view()(request._request)
