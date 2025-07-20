@@ -21,3 +21,19 @@ class Organizer(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class OrganizerMember(models.Model):
+    ROLE_CHOICES = [
+        ('owner_org', 'Owner'),
+        ('staff_org', 'Staff')
+    ]
+
+    organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE)
+    user_id = models.UUIDField()
+    role = models.CharField(
+        max_length=16, choices=ROLE_CHOICES, default='staff')
+    added_at = models.DateTimeField(auto_now_add=True, editable=False)
+
+    def __str__(self):
+        return self.organizer.name
