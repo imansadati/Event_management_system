@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework import serializers
-from .models import Organizer
+from .models import Organizer, OrganizerMember
 from django.http import HttpRequest
 from rest_framework.response import Response
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
@@ -11,7 +11,7 @@ from .services import organizer_create, organizer_update
 from rest_framework.exceptions import ValidationError
 
 
-# CRUD
+# organizer CRUD
 class OrganizerListApi(APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 2
@@ -22,7 +22,8 @@ class OrganizerListApi(APIView):
             fields = '__all__'
 
     class FilterOrganizerSerializer(serializers.Serializer):
-        title = serializers.CharField(max_length=128, required=False)
+        name = serializers.CharField(max_length=128, required=False)
+        type = serializers.CharField(max_length=16, required=False)
 
     def get(self, request: HttpRequest):
         filter_serializers = self.FilterOrganizerSerializer(
