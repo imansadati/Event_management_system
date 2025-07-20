@@ -109,6 +109,15 @@ class OrganizerUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class OrganizerDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        organizer = organizer_get(pk)
+
+        organizer.delete()
+
+        return Response({'detail': f'This organizer with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class OrganizerGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerListApi.as_view()(request._request)
@@ -124,3 +133,6 @@ class OrganizerGetwayApiViewset(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return OrganizerUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return OrganizerDeleteApi.as_view()(request._request, pk=pk)
