@@ -4,7 +4,7 @@ from .models import Organizer, OrganizerMember
 from django.http import HttpRequest
 from rest_framework.response import Response
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
-from .selectors import organizer_list, organizer_get, organizer_member_list
+from .selectors import organizer_list, organizer_get, organizer_member_list, organizer_member_get
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from .services import organizer_create, organizer_update
@@ -169,6 +169,23 @@ class OrganizerMemberListApi(APIView):
         )
 
 
+class OrganizerMemberDetailApi(APIView):
+    class OutputOrganizerMemberSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = OrganizerMember
+            fields = '__all__'
+
+    def get(self, request: HttpRequest, pk):
+        member = organizer_member_get(pk)
+
+        data = self.OutputOrganizerMemberSerializer(member).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class OrganizerMemberGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerMemberListApi.as_view()(request._request)
+
+    def retrieve(self, request: HttpRequest, pk=None):
+        return OrganizerMemberDetailApi.as_view()(request._request, pk=pk)

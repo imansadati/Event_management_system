@@ -19,3 +19,7 @@ def organizer_member_list(*, filters):
 
     qs = OrganizerMember.objects.all()
     return OrganizerMemberFilter(filters, qs).qs
+
+
+def organizer_member_get(organizer_id):
+    return get_object_or_404(OrganizerMember, id=organizer_id)

@@ -9,5 +9,8 @@ router.register('organizers', OrganizerGetwayApiViewset, basename='organizer')
 urlpatterns = [
     path('organizers/members/',
          OrganizerMemberGetwayApiViewset.as_view({'get': 'list'})),
+    path('organizers/members/<int:pk>/', OrganizerMemberGetwayApiViewset.as_view({
+        'get': 'retrieve',
+    })),
     path('', include(router.urls)),
 ]
