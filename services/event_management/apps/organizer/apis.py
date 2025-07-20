@@ -4,7 +4,7 @@ from .models import Organizer, OrganizerMember
 from django.http import HttpRequest
 from rest_framework.response import Response
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
-from .selectors import organizer_list, organizer_get
+from .selectors import organizer_list, organizer_get, organizer_member_list
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from .services import organizer_create, organizer_update
@@ -137,3 +137,38 @@ class OrganizerGetwayApiViewset(ViewSet):
 
     def delete(self, request: HttpRequest, pk=None):
         return OrganizerDeleteApi.as_view()(request._request, pk=pk)
+
+
+# organizer member CRUD
+class OrganizerMemberListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputOrganizerMemberSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = OrganizerMember
+            fields = '__all__'
+
+    class FilterOrganizerMemberSerializer(serializers.Serializer):
+        role = serializers.CharField(max_length=16, required=False)
+
+    def get(self, request: HttpRequest):
+        filter_serializers = self.FilterOrganizerMemberSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        members = organizer_member_list(
+            filters=filter_serializers.validated_data)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputOrganizerMemberSerializer,
+            queryset=members,
+            request=request,
+            view=self
+        )
+
+
+class OrganizerMemberGetwayApiViewset(ViewSet):
+    def list(self, request: HttpRequest):
+        return OrganizerMemberListApi.as_view()(request._request)
