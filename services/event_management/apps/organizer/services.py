@@ -1,4 +1,4 @@
-from .models import Organizer
+from .models import Organizer, OrganizerMember
 from django.db import transaction
 from shared_utils.update_model import model_update
 from rest_framework.exceptions import ValidationError
@@ -24,3 +24,10 @@ def organizer_update(*, organizer: Organizer, data):
         return updated_organizer
     except ValidationError as e:
         raise e
+
+
+@transaction.atomic()
+def organizer_member_create(**kwargs):
+    member = OrganizerMember.objects.create(**kwargs)
+
+    return member

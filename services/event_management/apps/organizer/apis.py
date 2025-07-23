@@ -7,7 +7,7 @@ from shared_utils.pagination import get_paginated_response, LimitOffsetPaginatio
 from .selectors import organizer_list, organizer_get, organizer_member_list, organizer_member_get
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
-from .services import organizer_create, organizer_update
+from .services import organizer_create, organizer_update, organizer_member_create
 from rest_framework.exceptions import ValidationError
 
 
@@ -183,9 +183,32 @@ class OrganizerMemberDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class OrganizerMemberCreateApi(APIView):
+    class InputOrganizerMemberSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = OrganizerMember
+            exclude = ['added_at']
+            extra_kwargs = {'role': {'required': True}}
+
+        # * TODO: Add user id validation via grpc
+
+    def post(self, reqeust: HttpRequest):
+        serializer = self.InputOrganizerMemberSerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        member = organizer_member_create(**serializer.validated_data)
+
+        data = OrganizerMemberDetailApi.OutputOrganizerMemberSerializer(
+            member).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
 class OrganizerMemberGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerMemberListApi.as_view()(request._request)
 
     def retrieve(self, request: HttpRequest, pk=None):
         return OrganizerMemberDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return OrganizerMemberCreateApi.as_view()(request._request)
