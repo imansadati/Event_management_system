@@ -24,6 +24,7 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     # path('user_management/admin/', admin.site.urls), # add this when you're in production mode
     path('api/', include('apps.events.urls')),
+    path('api/', include('apps.organizer.urls')),
 ]
 
 # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
