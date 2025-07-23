@@ -25,14 +25,14 @@ class Organizer(models.Model):
 
 class OrganizerMember(models.Model):
     ROLE_CHOICES = [
-        ('owner_org', 'Owner'),
-        ('staff_org', 'Staff')
+        ('owner', 'Owner'),
+        ('manager', 'Manager')
     ]
 
     organizer = models.ForeignKey(Organizer, on_delete=models.CASCADE)
-    user_id = models.UUIDField()
+    user_id = models.IntegerField()
     role = models.CharField(
-        max_length=16, choices=ROLE_CHOICES, default='staff')
+        max_length=16, choices=ROLE_CHOICES, default='manager')
     added_at = models.DateTimeField(auto_now_add=True, editable=False)
 
     def __str__(self):
