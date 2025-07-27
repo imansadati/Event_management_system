@@ -1,4 +1,4 @@
-from generated.user_pb2_grpc import UserServiceServicer
+from grpc_service.server.generated.user_pb2_grpc import UserServiceServicer
 from apps.users.models import AttendeeUser
 import grpc
 from grpc_service.server.generated import user_pb2
@@ -9,9 +9,9 @@ from grpc_service.server.generated.user_pb2_grpc import add_UserServiceServicer_
 class UserService(UserServiceServicer):
     def GetUser(self, request, context):
         try:
-            user = AttendeeUser.objects.get(id=request.user_id)
+            user = AttendeeUser.objects.get(id=request.id)
             return user_pb2.UserResponse(
-                id=str(user.id),
+                id=user.id,
                 email=user.email,
                 full_name=user.full_name,
             )
