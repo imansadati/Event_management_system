@@ -9,16 +9,16 @@ from grpc_service.server.generated.user_pb2_grpc import add_UserServiceServicer_
 class UserService(UserServiceServicer):
     def GetUser(self, request, context):
         try:
-            user = AttendeeUser.objects.get(id=request.id)
-            return user_pb2.UserResponse(
-                id=user.id,
+            user = AttendeeUser.objects.get(id=str(request.id))
+            return user_pb2.GetUserResponse(
+                id=str(user.id),
                 email=user.email,
                 full_name=user.full_name,
             )
         except AttendeeUser.DoesNotExist:
             context.set_details("User not found")
             context.set_code(grpc.StatusCode.NOT_FOUND)
-            return user_pb2.UserResponse()
+            return user_pb2.GetUserResponse()
 
 
 def serve():
