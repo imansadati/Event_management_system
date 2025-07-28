@@ -31,3 +31,17 @@ def organizer_member_create(**kwargs):
     member = OrganizerMember.objects.create(**kwargs)
 
     return member
+
+
+def organizer_member_update(*, member: OrganizerMember, data):
+    non_side_effect_fields = [
+        'role'
+    ]
+
+    try:
+        updated_organizer_member = model_update(
+            instance=member, fields=non_side_effect_fields, data=data
+        )
+        return updated_organizer_member
+    except ValidationError as e:
+        raise e

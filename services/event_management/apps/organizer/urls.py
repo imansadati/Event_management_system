@@ -11,6 +11,9 @@ urlpatterns = [
          OrganizerMemberGetwayApiViewset.as_view({'get': 'list', 'post': 'create'})),
     path('organizers/members/<int:pk>/', OrganizerMemberGetwayApiViewset.as_view({
         'get': 'retrieve',
+        'put': 'update',
+        'patch': 'partial_update',
+        'delete': 'delete'
     })),
     path('', include(router.urls)),
 ]
