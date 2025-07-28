@@ -246,6 +246,15 @@ class OrganizerMemberUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class OrganizerMemberDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        member = organizer_member_get(pk)
+
+        member.delete()
+
+        return Response({'detail': f'This organizer member with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class OrganizerMemberGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerMemberListApi.as_view()(request._request)
@@ -261,3 +270,6 @@ class OrganizerMemberGetwayApiViewset(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return OrganizerMemberUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return OrganizerMemberDeleteApi.as_view()(request._request, pk=pk)
