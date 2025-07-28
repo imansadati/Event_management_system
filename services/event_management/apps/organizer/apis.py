@@ -7,7 +7,7 @@ from shared_utils.pagination import get_paginated_response, LimitOffsetPaginatio
 from .selectors import organizer_list, organizer_get, organizer_member_list, organizer_member_get
 from rest_framework.viewsets import ViewSet
 from rest_framework import status
-from .services import organizer_create, organizer_update, organizer_member_create
+from .services import organizer_create, organizer_update, organizer_member_create, organizer_member_update
 from rest_framework.exceptions import ValidationError
 from grpc_service.client.client import validate_user_exists
 
@@ -209,6 +209,43 @@ class OrganizerMemberCreateApi(APIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
+class OrganizerMemberUpdateApi(APIView):
+    class InputOrganizerMemberSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = OrganizerMember
+            fields = ['role']
+            extra_kwargs = {'role': {'required': True}}
+
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def put(self, request: HttpRequest, pk):
+        return self.update_organizer_member(request, pk)
+
+    def patch(self, request: HttpRequest, pk):
+        return self.update_organizer_member(request, pk)
+
+    def update_organizer_member(self, request: HttpRequest, pk):
+        serializer = self.InputOrganizerMemberSerializer(
+            data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        member = organizer_member_get(pk)
+        try:
+            updated_organizer_member = organizer_member_update(
+                member=member, data=serializer.validated_data)
+            return Response(OrganizerMemberDetailApi.OutputOrganizerMemberSerializer(updated_organizer_member).data, status=status.HTTP_200_OK)
+        except Exception as e:
+            if e.get_codes() == ['no_content']:
+                return Response({'detail': 'No changes detected. organizer member data remains the same.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class OrganizerMemberGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return OrganizerMemberListApi.as_view()(request._request)
@@ -218,3 +255,9 @@ class OrganizerMemberGetwayApiViewset(ViewSet):
 
     def create(self, request: HttpRequest):
         return OrganizerMemberCreateApi.as_view()(request._request)
+
+    def update(self, request: HttpRequest, pk=None):
+        return OrganizerMemberUpdateApi.as_view()(request._request, pk=pk)
+
+    def partial_update(self, request: HttpRequest, pk=None):
+        return OrganizerMemberUpdateApi.as_view()(request._request, pk=pk)
