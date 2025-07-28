@@ -9,6 +9,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import status
 from .services import organizer_create, organizer_update, organizer_member_create
 from rest_framework.exceptions import ValidationError
+from grpc_service.client.client import validate_user_exists
 
 
 # organizer CRUD
@@ -190,7 +191,12 @@ class OrganizerMemberCreateApi(APIView):
             exclude = ['added_at']
             extra_kwargs = {'role': {'required': True}}
 
-        # * TODO: Add user id validation via grpc
+        def validate_user_id(self, value):
+            user = validate_user_exists(str(value))
+            if user is None:
+                raise serializers.ValidationError(
+                    "User not found in user service.")
+            return value
 
     def post(self, reqeust: HttpRequest):
         serializer = self.InputOrganizerMemberSerializer(data=reqeust.data)
