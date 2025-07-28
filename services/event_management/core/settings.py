@@ -27,6 +27,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'apps.events.apps.EventsConfig',
     'apps.organizer.apps.OrganizerConfig',
+    'apps.venue.apps.VenueConfig',
 ]
 
 INSTALLED_APPS = [
