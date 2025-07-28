@@ -108,6 +108,15 @@ class VenueUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class VenueDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        venue = venue_get(pk)
+
+        venue.delete()
+
+        return Response({'detail': f'This venue with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class VenueGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return VenueListApi.as_view()(request._request)
@@ -123,3 +132,6 @@ class VenueGetwayApiViewset(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return VenueUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return VenueDeleteApi.as_view()(request._request, pk=pk)
