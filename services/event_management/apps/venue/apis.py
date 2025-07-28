@@ -3,10 +3,10 @@ from rest_framework import serializers
 from .models import Venue
 from django.http import HttpRequest
 from rest_framework.viewsets import ViewSet
-from .selectors import venue_list
+from .selectors import venue_list, venue_get
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .selectors import venue_get
+from .services import venue_create
 from rest_framework import status
 
 
@@ -53,9 +53,28 @@ class VenueDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class VenueCreateApi(APIView):
+    class InputVenueSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Venue
+            exclude = ['created_at', 'updated_at']
+
+    def post(self, reqeust: HttpRequest):
+        serializer = self.InputVenueSerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        venue = venue_create(**serializer.validated_data)
+
+        data = VenueDetailApi.OutputVenueSerializer(venue).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
 class VenueGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return VenueListApi.as_view()(request._request)
 
     def retrieve(self, request: HttpRequest, pk=None):
         return VenueDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return VenueCreateApi.as_view()(request._request)
