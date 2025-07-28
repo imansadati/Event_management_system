@@ -5,6 +5,9 @@ from django.http import HttpRequest
 from rest_framework.viewsets import ViewSet
 from .selectors import venue_list
 from rest_framework.views import APIView
+from rest_framework.response import Response
+from .selectors import venue_get
+from rest_framework import status
 
 
 class VenueListApi(APIView):
@@ -36,6 +39,23 @@ class VenueListApi(APIView):
         )
 
 
+class VenueDetailApi(APIView):
+    class OutputVenueSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Venue
+            exclude = ['created_at', 'updated_at']
+
+    def get(self, request: HttpRequest, pk):
+        venue = venue_get(pk)
+
+        data = self.OutputVenueSerializer(venue).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class VenueGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return VenueListApi.as_view()(request._request)
+
+    def retrieve(self, request: HttpRequest, pk=None):
+        return VenueDetailApi.as_view()(request._request, pk=pk)
