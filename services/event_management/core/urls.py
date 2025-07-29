@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/', include('apps.organizer.urls')),
     path('api/', include('apps.venue.urls')),
     path('api/', include('apps.speaker.urls')),
+    path('api/', include('apps.session.urls')),
 ]
 
 # urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
