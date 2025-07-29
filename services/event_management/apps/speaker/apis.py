@@ -108,6 +108,15 @@ class SpeakerUpdateApi(APIView):
             return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SpeakerDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, pk):
+        speaker = speaker_get(pk)
+
+        speaker.delete()
+
+        return Response({'detail': f'This speaker with {pk} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 # To make endpoints RestFull
 class SpeakerGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
@@ -124,3 +133,6 @@ class SpeakerGetwayApiViewset(ViewSet):
 
     def partial_update(self, request: HttpRequest, pk=None):
         return SpeakerUpdateApi.as_view()(request._request, pk=pk)
+
+    def delete(self, request: HttpRequest, pk=None):
+        return SpeakerDeleteApi.as_view()(request._request, pk=pk)
