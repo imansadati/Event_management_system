@@ -28,6 +28,7 @@ LOCAL_APPS = [
     'apps.events.apps.EventsConfig',
     'apps.organizer.apps.OrganizerConfig',
     'apps.venue.apps.VenueConfig',
+    'apps.speaker.apps.SpeakerConfig',
 ]
 
 INSTALLED_APPS = [
