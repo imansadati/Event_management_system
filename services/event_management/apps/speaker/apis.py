@@ -4,7 +4,9 @@ from rest_framework.viewsets import ViewSet
 from .models import Speaker
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework import serializers
-from .selectors import speaker_list
+from .selectors import speaker_list, speaker_get
+from rest_framework import status
+from rest_framework.response import Response
 
 
 class SpeakerListApi(APIView):
@@ -37,7 +39,24 @@ class SpeakerListApi(APIView):
         )
 
 
+class SpeakerDetailApi(APIView):
+    class OutputSpeakerSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Speaker
+            exclude = ['created_at', 'updated_at']
+
+    def get(self, request: HttpRequest, pk):
+        speaker = speaker_get(pk)
+
+        data = self.OutputSpeakerSerializer(speaker).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 # To make endpoints RestFull
 class SpeakerGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
         return SpeakerListApi.as_view()(request._request)
+
+    def retrieve(self, request: HttpRequest, pk=None):
+        return SpeakerDetailApi.as_view()(request._request, pk=pk)
