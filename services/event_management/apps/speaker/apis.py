@@ -7,6 +7,7 @@ from rest_framework import serializers
 from .selectors import speaker_list, speaker_get
 from rest_framework import status
 from rest_framework.response import Response
+from .services import speaker_create
 
 
 class SpeakerListApi(APIView):
@@ -53,6 +54,22 @@ class SpeakerDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class SpeakerCreateApi(APIView):
+    class InputSpeakerSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Speaker
+            exclude = ['created_at', 'updated_at']
+
+    def post(self, reqeust: HttpRequest):
+        serializer = self.InputSpeakerSerializer(data=reqeust.data)
+        serializer.is_valid(raise_exception=True)
+
+        speaker = speaker_create(**serializer.validated_data)
+
+        data = SpeakerDetailApi.OutputSpeakerSerializer(speaker).data
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
 # To make endpoints RestFull
 class SpeakerGetwayApiViewset(ViewSet):
     def list(self, request: HttpRequest):
@@ -60,3 +77,6 @@ class SpeakerGetwayApiViewset(ViewSet):
 
     def retrieve(self, request: HttpRequest, pk=None):
         return SpeakerDetailApi.as_view()(request._request, pk=pk)
+
+    def create(self, request: HttpRequest):
+        return SpeakerCreateApi.as_view()(request._request)
