@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class EventManager(models.Manager):
@@ -64,3 +65,12 @@ class EventCategory(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# For the private type of event
+class EventGuest(models.Model):
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name='guest_list')
+    user_invited_by = models.IntegerField()
+    email = models.EmailField()
+    added_at = models.DateTimeField(auto_now_add=True)
