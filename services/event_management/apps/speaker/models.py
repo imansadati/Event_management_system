@@ -20,7 +20,7 @@ class Speaker(models.Model):
     name = models.CharField(max_length=128)
     bio = models.TextField(blank=True)
     type = models.CharField(
-        max_length=16, choices=SPEAKER_TYPES, default='others')
+        max_length=16, choices=SPEAKER_TYPES, default='other')
     photo = models.ImageField(
         upload_to='images/speaker/', blank=True, null=True)
     socials = JSONField(blank=True, null=True)
