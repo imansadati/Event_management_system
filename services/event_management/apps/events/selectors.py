@@ -7,7 +7,8 @@ from django.utils import timezone
 def event_list(*, filters):
     filters = filters or {}
 
-    qs = Event.objects.filter(status='published')
+    qs = Event.objects.filter(
+        status='published', end_datetime__gte=timezone.now())
     return EventFilter(filters, qs).qs
 
 
