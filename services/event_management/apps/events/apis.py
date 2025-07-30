@@ -340,7 +340,7 @@ class EventGuestListApi(APIView):
         )
 
 
-class EventDeleteApi(APIView):
+class EventGuestDeleteApi(APIView):
     def delete(self, reqeust: HttpRequest, event_id=None, guest_id=None):
         event = event_get(event_id)
 
@@ -361,4 +361,4 @@ class EventGuestGetwayApiViewSet(ViewSet):
         return EventGuestListApi.as_view()(request._request, event_id=event_id)
 
     def delete(self, request: HttpRequest, event_id=None, guest_id=None):
-        return EventDeleteApi.as_view()(request._request, event_id=event_id, guest_id=guest_id)
+        return EventGuestDeleteApi.as_view()(request._request, event_id=event_id, guest_id=guest_id)
