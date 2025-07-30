@@ -1,4 +1,5 @@
 from django.db import models
+import uuid
 
 
 class EventManager(models.Manager):
@@ -64,3 +65,31 @@ class EventCategory(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# For the private type of event
+class EventGuest(models.Model):
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name='guest_list')
+    user_invited_by = models.IntegerField()
+    email = models.EmailField()
+    added_at = models.DateTimeField(auto_now_add=True)
+
+
+# For the invite only type of event
+class EventInvite(models.Model):
+    STATUS_TYPES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('expired', 'Expired'),
+    ]
+
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name='invites')
+    email = models.EmailField()
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+    user_invited_by = models.IntegerField()
+    status = models.CharField(
+        max_length=16, choices=STATUS_TYPES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
