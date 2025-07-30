@@ -1,6 +1,7 @@
 from .models import Event, EventCategory, EventGuest
-from .filters import EventFilter, EventCategoryFilter
+from .filters import EventFilter, EventCategoryFilter, EventGuestFilter
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 
 def event_list(*, filters):
@@ -27,3 +28,11 @@ def event_category_get(category_id):
 
 def guest_get_by_email(email) -> bool:
     return EventGuest.objects.filter(email=email).exists()
+
+
+def event_guest_list(*, filters, event_id):
+    filters = filters or {}
+
+    qs = EventGuest.objects.filter(
+        event__status='published', event__id=event_id, event__end_datetime__gte=timezone.now())
+    return EventGuestFilter(filters, qs).qs

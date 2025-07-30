@@ -3,7 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get, event_category_list, event_category_get
+from .selectors import event_list, event_get, event_category_list, event_category_get, event_guest_list
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -306,6 +306,38 @@ class EventGuestCreateApi(APIView):
         return Response(data={'detail': f'This {guest.email} email successfully added in guest list.'}, status=status.HTTP_201_CREATED)
 
 
+class EventGuestListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputEventGuestListSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventGuest
+            fields = '__all__'
+
+    class FilterEventGuestSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=False)
+
+    def get(self, request: HttpRequest, event_id=None):
+        filter_serializers = self.FilterEventGuestSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        guests = event_guest_list(
+            filters=filter_serializers.validated_data, event_id=event_id)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputEventGuestListSerializer,
+            queryset=guests,
+            request=request,
+            view=self
+        )
+
+
 class EventGuestGetwayApiViewSet(ViewSet):
     def create(self, request: HttpRequest, event_id=None):
         return EventGuestCreateApi.as_view()(request._request, event_id=event_id)
+
+    def list(self, request: HttpRequest, event_id=None):
+        return EventGuestListApi.as_view()(request._request, event_id=event_id)
