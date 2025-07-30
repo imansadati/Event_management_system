@@ -13,7 +13,7 @@ def event_list(*, filters):
 
 
 def event_get(event_id):
-    return get_object_or_404(Event, id=event_id)
+    return get_object_or_404(Event, id=event_id, status='published', end_datetime__gte=timezone.now())
 
 
 def event_category_list(*, filters):
