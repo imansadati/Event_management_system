@@ -323,6 +323,11 @@ class EventGuestListApi(APIView):
             data=request.query_params)
         filter_serializers.is_valid(raise_exception=True)
 
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
         guests = event_guest_list(
             filters=filter_serializers.validated_data, event_id=event_id)
 
