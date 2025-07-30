@@ -30,6 +30,10 @@ def guest_get_by_email(email) -> bool:
     return EventGuest.objects.filter(email=email).exists()
 
 
+def guest_get_by_id_and_event(guest_id, event):
+    return get_object_or_404(EventGuest, id=guest_id, event=event)
+
+
 def event_guest_list(*, filters, event_id):
     filters = filters or {}
 

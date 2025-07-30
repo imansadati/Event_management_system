@@ -3,7 +3,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get, event_category_list, event_category_get, event_guest_list
+from .selectors import event_list, event_get, event_category_list, event_category_get, event_guest_list, guest_get_by_id_and_event
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -340,9 +340,25 @@ class EventGuestListApi(APIView):
         )
 
 
+class EventDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, event_id=None, guest_id=None):
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
+        guest = guest_get_by_id_and_event(guest_id=guest_id, event=event)
+        guest.delete()
+
+        return Response({'detail': f'This guest with {guest_id} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
 class EventGuestGetwayApiViewSet(ViewSet):
     def create(self, request: HttpRequest, event_id=None):
         return EventGuestCreateApi.as_view()(request._request, event_id=event_id)
 
     def list(self, request: HttpRequest, event_id=None):
         return EventGuestListApi.as_view()(request._request, event_id=event_id)
+
+    def delete(self, request: HttpRequest, event_id=None, guest_id=None):
+        return EventDeleteApi.as_view()(request._request, event_id=event_id, guest_id=guest_id)

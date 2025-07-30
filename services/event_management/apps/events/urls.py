@@ -18,5 +18,8 @@ urlpatterns = [
         'post': 'create',
         'get': 'list',
     })),
+    path('events/<int:event_id>/guest-list/<int:guest_id>', EventGuestGetwayApiViewSet.as_view({
+        'delete': 'delete',
+    })),
     path('', include(router.urls)),
 ]
