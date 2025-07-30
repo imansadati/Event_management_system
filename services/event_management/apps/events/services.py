@@ -1,3 +1,4 @@
+from .models import EventGuest
 from .models import Event, EventCategory
 from django.db import transaction
 from django.utils import timezone
@@ -69,3 +70,9 @@ def event_category_update(*, category: EventCategory, data):
         return updated_category
     except ValidationError as e:
         raise e
+
+
+@transaction.atomic()
+def guest_create(email, current_user, event):
+    return EventGuest.objects.get_or_create(
+        event=event, email=email, defaults={'user_invited_by': current_user})

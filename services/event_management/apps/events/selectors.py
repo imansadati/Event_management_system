@@ -1,4 +1,4 @@
-from .models import Event, EventCategory
+from .models import Event, EventCategory, EventGuest
 from .filters import EventFilter, EventCategoryFilter
 from django.shortcuts import get_object_or_404
 
@@ -23,3 +23,7 @@ def event_category_list(*, filters):
 
 def event_category_get(category_id):
     return get_object_or_404(EventCategory, id=category_id)
+
+
+def guest_get_by_email(email) -> bool:
+    return EventGuest.objects.filter(email=email).exists()

@@ -7,8 +7,9 @@ from .selectors import event_list, event_get, event_category_list, event_categor
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update, event_category_create, event_category_update
+from .services import event_create, event_update, event_category_create, event_category_update, guest_create
 from rest_framework.exceptions import ValidationError
+from apps.events.models import EventGuest
 
 
 class EventCategoryListApi(APIView):
@@ -278,3 +279,33 @@ class EventGetwayApiViewSet(ViewSet):
 
     def delete(self, request: HttpRequest, pk=None):
         return EventDeleteApi.as_view()(request._request, pk=pk)
+
+
+# Those emails in guest list can see private events.
+# Test this api when added permissions
+class EventGuestCreateApi(APIView):
+    class InputEventGuestSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventGuest
+            fields = ['email']
+
+    def post(self, request: HttpRequest, event_id=None):
+        serializer = self.InputEventGuestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_user = 1  # test
+        email = serializer.validated_data.get('email')
+
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
+        guest, created = guest_create(
+            email=email, current_user=current_user, event=event)
+
+        return Response(data={'detail': f'This {guest.email} email successfully added in guest list.'}, status=status.HTTP_201_CREATED)
+
+
+class EventGuestGetwayApiViewSet(ViewSet):
+    def create(self, request: HttpRequest, event_id=None):
+        return EventGuestCreateApi.as_view()(request._request, event_id=event_id)
