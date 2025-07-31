@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import JSONField
 from apps.session.models import Session
+from apps.events.models import Event
 
 
 class Speaker(models.Model):
@@ -20,6 +21,7 @@ class Speaker(models.Model):
 
     name = models.CharField(max_length=128)
     bio = models.TextField(blank=True)
+    event = models.ManyToManyField(Event, related_name='events', blank=True)
     type = models.CharField(
         max_length=16, choices=SPEAKER_TYPES, default='other')
     photo = models.ImageField(
