@@ -23,6 +23,7 @@ urlpatterns = [
     })),
     path('events/<int:event_id>/invites', EventInviteGetwayApiViewSet.as_view({
         'post': 'create',
+        'get': 'list',
     })),
     path('', include(router.urls)),
 ]

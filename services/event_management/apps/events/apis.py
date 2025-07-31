@@ -3,13 +3,15 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get, event_category_list, event_category_get, event_guest_list, guest_get_by_id_and_event
+from .selectors import (event_list, event_get, event_category_list, event_category_get,
+                        event_guest_list, guest_get_by_id_and_event, event_invite_list)
+from .services import (event_create, event_update, event_category_create,
+                       event_category_update, guest_create, invite_create)
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update, event_category_create, event_category_update, guest_create, invite_create
 from rest_framework.exceptions import ValidationError
-from apps.events.models import EventGuest
+from apps.events.models import EventGuest, EventInvite
 from grpc_service.client.client import send_email_via_rpc
 
 
@@ -399,6 +401,43 @@ class EventInviteCreateApi(APIView):
         return Response(data={'detail': f'This {invite.email} email successfully sent invite for it.'}, status=status.HTTP_201_CREATED)
 
 
+class EventInviteListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputEventInviteListSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventInvite
+            fields = '__all__'
+
+    class FilterEventInviteSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=False)
+
+    def get(self, request: HttpRequest, event_id=None):
+        filter_serializers = self.FilterEventInviteSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        event = event_get(event_id)
+
+        if event.type != 'invite_only':
+            return Response({'detail': 'Invites are only for invite_only events.'}, status=status.HTTP_409_CONFLICT)
+
+        invites = event_invite_list(
+            filters=filter_serializers.validated_data, event_id=event_id)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputEventInviteListSerializer,
+            queryset=invites,
+            request=request,
+            view=self
+        )
+
+
 class EventInviteGetwayApiViewSet(ViewSet):
     def create(self, request: HttpRequest, event_id=None):
         return EventInviteCreateApi.as_view()(request._request, event_id=event_id)
+
+    def list(self, request: HttpRequest, event_id=None):
+        return EventInviteListApi.as_view()(request._request, event_id=event_id)

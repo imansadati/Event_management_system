@@ -1,5 +1,5 @@
-from .models import Event, EventCategory, EventGuest
-from .filters import EventFilter, EventCategoryFilter, EventGuestFilter
+from .models import Event, EventCategory, EventGuest, EventInvite
+from .filters import EventFilter, EventCategoryFilter, EventGuestFilter, EventInviteFilter
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -41,3 +41,11 @@ def event_guest_list(*, filters, event_id):
     qs = EventGuest.objects.filter(
         event__status='published', event__id=event_id, event__end_datetime__gte=timezone.now())
     return EventGuestFilter(filters, qs).qs
+
+
+def event_invite_list(*, filters, event_id):
+    filters = filters or {}
+
+    qs = EventInvite.objects.filter(
+        event__status='published', event__id=event_id, event__end_datetime__gte=timezone.now())
+    return EventInviteFilter(filters, qs).qs
