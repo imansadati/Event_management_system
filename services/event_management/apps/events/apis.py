@@ -185,6 +185,11 @@ class EventListApi(APIView):
 
 class EventDetailApi(APIView):
     class OutputEventSerializer(serializers.ModelSerializer):
+        organizer = OrganizerListApi.OutputOrganizerListSerializer(
+            read_only=True)
+        category = EventCategoryListApi.OutputEventCategoryListSerializer(
+            read_only=True)
+
         class Meta:
             model = Event
             exclude = ['type', 'status', 'published_at', 'updated_at']
