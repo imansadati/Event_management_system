@@ -1,3 +1,5 @@
+from grpc_service.client.generated import notification_pb2
+from grpc_service.client.generated.notification_pb2_grpc import NotificationServiceStub
 import grpc
 from grpc_service.client.generated.user_pb2_grpc import UserServiceStub
 from grpc_service.client.generated import user_pb2
@@ -18,3 +20,14 @@ def validate_user_exists(user_id):
             raise ValidationError('User not found')
         else:
             raise ValidationError(f'gRPC error: {e.details()}')
+
+
+def send_email_via_rpc(recipient, subject, body):
+    with grpc.insecure_channel("notification:50051") as channel:
+        stub = NotificationServiceStub(channel)
+        response = stub.SendEmail(notification_pb2.SendEmailRequest(
+            recipient=recipient,
+            subject=subject,
+            body=body
+        ))
+        return response.success

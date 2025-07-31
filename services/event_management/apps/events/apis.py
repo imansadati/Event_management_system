@@ -10,6 +10,7 @@ from rest_framework import status
 from .services import event_create, event_update, event_category_create, event_category_update, guest_create, invite_create
 from rest_framework.exceptions import ValidationError
 from apps.events.models import EventGuest
+from grpc_service.client.client import send_email_via_rpc
 
 
 class EventCategoryListApi(APIView):
@@ -386,6 +387,14 @@ class EventInviteCreateApi(APIView):
 
         invite, created = invite_create(
             email=email, event=event, current_user=current_user, default_exp=default_exp)
+
+        if created:
+            # * TODO: Must complete this section after finished session apis.
+            invite_url = 'test'
+            send_email_via_rpc(invite.email, 'Invited to the event',
+                               f'Click on this link to sign-up {invite_url}')
+            print(invite)
+            print(invite.expires_at)
 
         return Response(data={'detail': f'This {invite.email} email successfully sent invite for it.'}, status=status.HTTP_201_CREATED)
 
