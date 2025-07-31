@@ -1,10 +1,11 @@
-from .models import EventGuest
+from .models import EventGuest, EventInvite
 from .models import Event, EventCategory
 from django.db import transaction
 from django.utils import timezone
 from .tasks import publsih_event_task
 from shared_utils.update_model import model_update
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone
 
 
 @transaction.atomic()
@@ -76,3 +77,10 @@ def event_category_update(*, category: EventCategory, data):
 def guest_create(email, current_user, event):
     return EventGuest.objects.get_or_create(
         event=event, email=email, defaults={'user_invited_by': current_user})
+
+
+@transaction.atomic()
+def invite_create(email, event, current_user, default_exp):
+    now = timezone.now()
+    return EventInvite.objects.get_or_create(
+        email=email, event=event, defaults={'user_invited_by': current_user, 'expires_at': now + timezone.timedelta(hours=default_exp)})

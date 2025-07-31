@@ -7,7 +7,7 @@ from .selectors import event_list, event_get, event_category_list, event_categor
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update, event_category_create, event_category_update, guest_create
+from .services import event_create, event_update, event_category_create, event_category_update, guest_create, invite_create
 from rest_framework.exceptions import ValidationError
 from apps.events.models import EventGuest
 
@@ -362,3 +362,34 @@ class EventGuestGetwayApiViewSet(ViewSet):
 
     def delete(self, request: HttpRequest, event_id=None, guest_id=None):
         return EventGuestDeleteApi.as_view()(request._request, event_id=event_id, guest_id=guest_id)
+
+
+# Test this api when added permissions
+class EventInviteCreateApi(APIView):
+    class InputEventInviteSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+        expires_in_hours = serializers.IntegerField(required=False)
+
+    def post(self, request: HttpRequest, event_id=None):
+        serializer = self.InputEventInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_user = 1
+
+        event = event_get(event_id)
+
+        if event.type != 'invite_only':
+            return Response({'detail': 'Invites are only for invite_only events.'}, status=status.HTTP_409_CONFLICT)
+
+        default_exp = serializer.validated_data.get('expires_in_hours', 48)
+        print(default_exp)
+        email = serializer.validated_data.get('email')
+
+        invite, created = invite_create(
+            email=email, event=event, current_user=current_user, default_exp=default_exp)
+
+        return Response(data={'detail': f'This {invite.email} email successfully sent invite for it.'}, status=status.HTTP_201_CREATED)
+
+
+class EventInviteGetwayApiViewSet(ViewSet):
+    def create(self, request: HttpRequest, event_id=None):
+        return EventInviteCreateApi.as_view()(request._request, event_id=event_id)
