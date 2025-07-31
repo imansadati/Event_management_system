@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from apps.organizer.models import Organizer
 
 
 class EventManager(models.Manager):
@@ -34,6 +35,8 @@ class Event(models.Model):
         max_length=16, choices=TYPE_CHOICES, default='public')
     status = models.CharField(
         max_length=16, choices=STATUS_CHOICES, default='draft')
+    organizer = models.ForeignKey(
+        Organizer, on_delete=models.CASCADE, related_name='events')
     category = models.ForeignKey(
         'EventCategory', on_delete=models.SET_NULL, null=True, related_name='events')
     cover_images = models.ImageField(
