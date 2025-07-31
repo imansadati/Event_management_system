@@ -75,6 +75,14 @@ class EventGuest(models.Model):
     email = models.EmailField()
     added_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['event', 'email'],
+                name='unique_event_email',
+            )
+        ]
+
 
 # For the invite only type of event
 class EventInvite(models.Model):

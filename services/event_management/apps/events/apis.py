@@ -3,12 +3,16 @@ from rest_framework.viewsets import ViewSet
 from rest_framework import serializers
 from django.http import HttpRequest
 from .models import Event, EventCategory
-from .selectors import event_list, event_get, event_category_list, event_category_get
+from .selectors import (event_list, event_get, event_category_list, event_category_get,
+                        event_guest_list, guest_get_by_id_and_event, event_invite_list)
+from .services import (event_create, event_update, event_category_create,
+                       event_category_update, guest_create, invite_create)
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
-from .services import event_create, event_update, event_category_create, event_category_update
 from rest_framework.exceptions import ValidationError
+from apps.events.models import EventGuest, EventInvite
+from grpc_service.client.client import send_email_via_rpc
 
 
 class EventCategoryListApi(APIView):
@@ -278,3 +282,162 @@ class EventGetwayApiViewSet(ViewSet):
 
     def delete(self, request: HttpRequest, pk=None):
         return EventDeleteApi.as_view()(request._request, pk=pk)
+
+
+# Those emails in guest list can see private events.
+# Test this api when added permissions
+class EventGuestCreateApi(APIView):
+    class InputEventGuestSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventGuest
+            fields = ['email']
+
+    def post(self, request: HttpRequest, event_id=None):
+        serializer = self.InputEventGuestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_user = 1  # test
+        email = serializer.validated_data.get('email')
+
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
+        guest, created = guest_create(
+            email=email, current_user=current_user, event=event)
+
+        return Response(data={'detail': f'This {guest.email} email successfully added in guest list.'}, status=status.HTTP_201_CREATED)
+
+
+class EventGuestListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputEventGuestListSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventGuest
+            fields = '__all__'
+
+    class FilterEventGuestSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=False)
+
+    def get(self, request: HttpRequest, event_id=None):
+        filter_serializers = self.FilterEventGuestSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
+        guests = event_guest_list(
+            filters=filter_serializers.validated_data, event_id=event_id)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputEventGuestListSerializer,
+            queryset=guests,
+            request=request,
+            view=self
+        )
+
+
+class EventGuestDeleteApi(APIView):
+    def delete(self, reqeust: HttpRequest, event_id=None, guest_id=None):
+        event = event_get(event_id)
+
+        if event.type != 'private':
+            return Response({'detail': 'Guest list is only for private events.'}, status=status.HTTP_409_CONFLICT)
+
+        guest = guest_get_by_id_and_event(guest_id=guest_id, event=event)
+        guest.delete()
+
+        return Response({'detail': f'This guest with {guest_id} id successfully deleted.'}, status=status.HTTP_200_OK)
+
+
+class EventGuestGetwayApiViewSet(ViewSet):
+    def create(self, request: HttpRequest, event_id=None):
+        return EventGuestCreateApi.as_view()(request._request, event_id=event_id)
+
+    def list(self, request: HttpRequest, event_id=None):
+        return EventGuestListApi.as_view()(request._request, event_id=event_id)
+
+    def delete(self, request: HttpRequest, event_id=None, guest_id=None):
+        return EventGuestDeleteApi.as_view()(request._request, event_id=event_id, guest_id=guest_id)
+
+
+# Test this api when added permissions
+class EventInviteCreateApi(APIView):
+    class InputEventInviteSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=True)
+        expires_in_hours = serializers.IntegerField(required=False)
+
+    def post(self, request: HttpRequest, event_id=None):
+        serializer = self.InputEventInviteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        current_user = 1
+
+        event = event_get(event_id)
+
+        if event.type != 'invite_only':
+            return Response({'detail': 'Invites are only for invite_only events.'}, status=status.HTTP_409_CONFLICT)
+
+        default_exp = serializer.validated_data.get('expires_in_hours', 48)
+        print(default_exp)
+        email = serializer.validated_data.get('email')
+
+        invite, created = invite_create(
+            email=email, event=event, current_user=current_user, default_exp=default_exp)
+
+        if created:
+            # * TODO: Must complete this section after finished session apis.
+            invite_url = 'test'
+            send_email_via_rpc(invite.email, 'Invited to the event',
+                               f'Click on this link to sign-up {invite_url}')
+            print(invite)
+            print(invite.expires_at)
+
+        return Response(data={'detail': f'This {invite.email} email successfully sent invite for it.'}, status=status.HTTP_201_CREATED)
+
+
+class EventInviteListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputEventInviteListSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = EventInvite
+            fields = '__all__'
+
+    class FilterEventInviteSerializer(serializers.Serializer):
+        email = serializers.EmailField(required=False)
+
+    def get(self, request: HttpRequest, event_id=None):
+        filter_serializers = self.FilterEventInviteSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        event = event_get(event_id)
+
+        if event.type != 'invite_only':
+            return Response({'detail': 'Invites are only for invite_only events.'}, status=status.HTTP_409_CONFLICT)
+
+        invites = event_invite_list(
+            filters=filter_serializers.validated_data, event_id=event_id)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputEventInviteListSerializer,
+            queryset=invites,
+            request=request,
+            view=self
+        )
+
+
+class EventInviteGetwayApiViewSet(ViewSet):
+    def create(self, request: HttpRequest, event_id=None):
+        return EventInviteCreateApi.as_view()(request._request, event_id=event_id)
+
+    def list(self, request: HttpRequest, event_id=None):
+        return EventInviteListApi.as_view()(request._request, event_id=event_id)
