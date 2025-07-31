@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import JSONField
+from apps.session.models import Session
 
 
 class Speaker(models.Model):
@@ -32,4 +33,11 @@ class Speaker(models.Model):
     def __str__(self):
         return self.name
 
-# * TODO: After create session app and complete model must Add SessionSpeaker model
+
+class SessionSpeaker(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    speaker = models.ForeignKey(Speaker, on_delete=models.CASCADE)
+    role = models.CharField(max_length=50, blank=True)
+
+    class Meta:
+        unique_together = ('session', 'speaker')
