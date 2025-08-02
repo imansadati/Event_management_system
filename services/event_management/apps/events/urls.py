@@ -5,25 +5,49 @@ from .apis import EventGetwayApiViewSet, EventCategoryGetwayApiViewSet, EventGue
 router = DefaultRouter()
 router.register('events', EventGetwayApiViewSet, basename='event')
 
+# category
+category_list = EventCategoryGetwayApiViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+category_detail = EventCategoryGetwayApiViewSet.as_view({
+    'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
+    'delete': 'delete',
+})
+
+# guest list
+guest_list = EventGuestGetwayApiViewSet.as_view({
+    'post': 'create',
+    'get': 'list',
+})
+guest_detail = EventGuestGetwayApiViewSet.as_view({
+    'delete': 'delete',
+})
+
+# invite
+invite_list = EventInviteGetwayApiViewSet.as_view({
+    'post': 'create',
+    'get': 'list',
+})
+
 urlpatterns = [
-    path('events/categories/',
-         EventCategoryGetwayApiViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('events/categories/<int:pk>/', EventCategoryGetwayApiViewSet.as_view({
-        'get': 'retrieve',
-        'put': 'update',
-        'patch': 'partial_update',
-        'delete': 'delete',
-    })),
-    path('events/<int:event_id>/guest-list', EventGuestGetwayApiViewSet.as_view({
-        'post': 'create',
-        'get': 'list',
-    })),
-    path('events/<int:event_id>/guest-list/<int:guest_id>', EventGuestGetwayApiViewSet.as_view({
-        'delete': 'delete',
-    })),
-    path('events/<int:event_id>/invites', EventInviteGetwayApiViewSet.as_view({
-        'post': 'create',
-        'get': 'list',
-    })),
+    # category
+    path('events/categories/', category_list, name='event_category_list'),
+    path('events/categories/<int:pk>/', category_detail,
+         name='event_category_detail'),
+
+    # guest list
+    path('events/<int:event_id>/guest-list',
+         guest_list, name='event_guest_list'),
+    path('events/<int:event_id>/guest-list/<int:guest_id>',
+         guest_detail, name='event_guest_detail'),
+
+    # invite
+    path('events/<int:event_id>/invites',
+         invite_list, name='event_invite_list'),
+
+    # root
     path('', include(router.urls)),
 ]
