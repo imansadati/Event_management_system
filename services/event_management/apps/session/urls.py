@@ -8,6 +8,7 @@ router = DefaultRouter()
 # sessions with event_id
 session_event_list = SessionEventGetwayApiViewSet.as_view({
     'post': 'create',
+    'get': 'list'
 })
 
 

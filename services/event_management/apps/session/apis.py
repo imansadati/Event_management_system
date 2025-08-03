@@ -7,11 +7,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from apps.events.selectors import event_get
 from .services import session_create
+from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
+from .selectors import session_list
+from apps.events.apis import EventDetailApi
 
 
-# events/event_id/sessions/  Create
-
-# events/event_id/sessions/  List
 # sessions/session_id  retrieve
 # sessions/session_id  update & partial update
 
@@ -49,6 +49,42 @@ class SessionEventCreateApi(APIView):
         return Response(data=f'This session with {session.id} id successfully created.', status=status.HTTP_201_CREATED)
 
 
+class SessionEventListApi(APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 2
+
+    class OutputSessionEventListSerializer(serializers.ModelSerializer):
+        event = EventDetailApi.OutputEventSerializer()
+
+        class Meta:
+            model = Session
+            fields = '__all__'
+
+    class FilterSessionEventSerializer(serializers.Serializer):
+        title = serializers.CharField(max_length=128, required=False)
+        event = serializers.IntegerField(required=False)
+
+    def get(self, request: HttpRequest, event_id=None):
+        filter_serializers = self.FilterSessionEventSerializer(
+            data=request.query_params)
+        filter_serializers.is_valid(raise_exception=True)
+
+        event = event_get(event_id)
+
+        sessions = session_list(filters=filter_serializers.validated_data)
+
+        return get_paginated_response(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSessionEventListSerializer,
+            queryset=sessions,
+            request=request,
+            view=self
+        )
+
+
 class SessionEventGetwayApiViewSet(ViewSet):
     def create(self, request: HttpRequest, event_id=None):
         return SessionEventCreateApi.as_view()(request._request, event_id=event_id)
+
+    def list(self, request: HttpRequest, event_id=None):
+        return SessionEventListApi.as_view()(request._request, event_id=event_id)
