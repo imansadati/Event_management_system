@@ -8,6 +8,7 @@ from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 
 
+# * TODO: Must assign event speaker
 @transaction.atomic()
 def event_create(**kwargs):
     now = timezone.now()
