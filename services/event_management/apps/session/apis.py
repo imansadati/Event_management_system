@@ -46,7 +46,7 @@ class SessionEventCreateApi(APIView):
 
         session = session_create(event=event, **serializer.validated_data)
 
-        return Response(data='test', status=status.HTTP_201_CREATED)
+        return Response(data=f'This session with {session.id} id successfully created.', status=status.HTTP_201_CREATED)
 
 
 class SessionEventGetwayApiViewSet(ViewSet):
