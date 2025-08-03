@@ -56,6 +56,7 @@ class OrganizerDetailApi(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+# * TODO: Also need set owner role in member after current organizer created.
 class OrganizerCreateApi(APIView):
     class InputOrganizerSerializer(serializers.ModelSerializer):
         class Meta:
