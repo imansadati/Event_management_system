@@ -120,7 +120,8 @@ class SessionEventListApi(APIView):
 
         event = event_get(event_id)
 
-        sessions = session_list(filters=filter_serializers.validated_data)
+        sessions = session_list(
+            filters=filter_serializers.validated_data, event=event)
 
         return get_paginated_response(
             pagination_class=self.Pagination,

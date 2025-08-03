@@ -16,8 +16,8 @@ def session_time_conflict(event, start_time, end_time):
     ).exists()
 
 
-def session_list(*, filters):
+def session_list(*, filters, event):
     filters = filters or {}
 
-    qs = Session.objects.all()
+    qs = Session.objects.filter(event=event)
     return SessionFilter(filters, qs).qs
