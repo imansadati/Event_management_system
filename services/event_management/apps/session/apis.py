@@ -93,9 +93,13 @@ class SessionEventCreateApi(APIView):
             raise ValidationError(
                 detail='The Session datetime conflict with the event datetime.')
 
-        session = session_create(event=event, **serializer.validated_data)
-
-        return Response(data=f'This session with {session.id} id successfully created.', status=status.HTTP_201_CREATED)
+        try:
+            session = session_create(event=event, **serializer.validated_data)
+            return Response(SessionDetailApi.OutputSessionSerializer(session).data, status=status.HTTP_200_OK)
+        except Exception as e:
+            if e.get_codes() == ['no_content']:
+                return Response({'detail': 'No changes detected. session data remains the same.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SessionEventListApi(APIView):
