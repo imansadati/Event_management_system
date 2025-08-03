@@ -8,15 +8,31 @@ from rest_framework.response import Response
 from apps.events.selectors import event_get
 from .services import session_create
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
-from .selectors import session_list
+from .selectors import session_list, session_get
 from apps.events.apis import EventDetailApi
 
 
-# sessions/session_id  retrieve
 # sessions/session_id  update & partial update
 
 
 # add permission to check only organizer/admins can access to this api
+
+class SessionDetailApi(APIView):
+    class OutputSessionSerializer(serializers.ModelSerializer):
+        event = EventDetailApi.OutputEventSerializer()
+
+        class Meta:
+            model = Session
+            exclude = ['created_at', 'updated_at']
+
+    def get(self, request: HttpRequest, session_id=None):
+        session = session_get(session_id)
+
+        data = self.OutputSessionSerializer(session).data
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class SessionEventCreateApi(APIView):
     class InputSessionEventSerializer(serializers.ModelSerializer):
         class Meta:
@@ -88,3 +104,8 @@ class SessionEventGetwayApiViewSet(ViewSet):
 
     def list(self, request: HttpRequest, event_id=None):
         return SessionEventListApi.as_view()(request._request, event_id=event_id)
+
+
+class SessionGetwayApiViewSet(ViewSet):
+    def retrieve(self, request: HttpRequest, session_id=None):
+        return SessionDetailApi.as_view()(request._request, session_id=session_id)

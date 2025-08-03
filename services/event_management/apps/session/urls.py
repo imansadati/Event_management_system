@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
-from .apis import SessionEventGetwayApiViewSet
+from .apis import SessionEventGetwayApiViewSet, SessionGetwayApiViewSet
 
 
 router = DefaultRouter()
@@ -11,11 +11,18 @@ session_event_list = SessionEventGetwayApiViewSet.as_view({
     'get': 'list'
 })
 
+# sessions
+session_detail = SessionGetwayApiViewSet.as_view({
+    'get': 'retrieve',
+})
 
 urlpatterns = [
     # sessions with event_id
     path('events/<int:event_id>/sessions',
          session_event_list, name='session_event_list'),
+
+    # sessions
+    path('sessions/<int:session_id>', session_detail, name='session_detail'),
 
     # root
     path('', include(router.urls)),

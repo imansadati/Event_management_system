@@ -2,6 +2,11 @@ from .models import Session
 from django.db.models import Q
 from .models import Session
 from .filters import SessionFilter
+from django.shortcuts import get_object_or_404
+
+
+def session_get(session_id):
+    return get_object_or_404(Session, id=session_id)
 
 
 def session_time_conflict(event, start_time, end_time):
