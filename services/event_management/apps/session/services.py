@@ -2,6 +2,22 @@ from django.db import transaction
 from .models import Session
 from .selectors import session_time_conflict
 from rest_framework.exceptions import ValidationError
+from shared_utils.update_model import model_update
+
+
+def session_update(*, session: Session, data):
+    non_side_effect_fields = [
+        'title',
+        'capacity'
+    ]
+
+    try:
+        updated_session = model_update(
+            instance=session, fields=non_side_effect_fields, data=data
+        )
+        return updated_session
+    except ValidationError as e:
+        raise e
 
 
 @transaction.atomic()

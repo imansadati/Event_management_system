@@ -6,17 +6,13 @@ from .models import Session
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from apps.events.selectors import event_get
-from .services import session_create
+from .services import session_create, session_update
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from .selectors import session_list, session_get
 from apps.events.apis import EventDetailApi
 
 
-# sessions/session_id  update & partial update
-
-
 # add permission to check only organizer/admins can access to this api
-
 class SessionDetailApi(APIView):
     class OutputSessionSerializer(serializers.ModelSerializer):
         event = EventDetailApi.OutputEventSerializer()
@@ -31,6 +27,43 @@ class SessionDetailApi(APIView):
         data = self.OutputSessionSerializer(session).data
 
         return Response(data, status=status.HTTP_200_OK)
+
+
+class SessionUpdateApi(APIView):
+    class InputSessionSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Session
+            fields = ['title', 'capacity']  # add more if needed
+
+        # check the user does not enter additional fields
+        def validate(self, data):
+            extra_fields = set(self.initial_data.keys()) - \
+                set(self.fields.keys())
+            if extra_fields:
+                raise ValidationError(
+                    {"extra_fields": f"Unexpected fields: {', '.join(extra_fields)}"})
+            return data
+
+    def put(self, request: HttpRequest, session_id):
+        return self.update_session(request, session_id)
+
+    def patch(self, request: HttpRequest, session_id):
+        return self.update_session(request, session_id)
+
+    def update_session(self, request: HttpRequest, session_id=None):
+        serializer = self.InputSessionSerializer(
+            data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        session = session_get(session_id)
+        try:
+            updated_session = session_update(
+                session=session, data=serializer.validated_data)
+            return Response(SessionDetailApi.OutputSessionSerializer(updated_session).data, status=status.HTTP_200_OK)
+        except Exception as e:
+            if e.get_codes() == ['no_content']:
+                return Response({'detail': 'No changes detected. session data remains the same.'}, status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SessionEventCreateApi(APIView):
@@ -109,3 +142,9 @@ class SessionEventGetwayApiViewSet(ViewSet):
 class SessionGetwayApiViewSet(ViewSet):
     def retrieve(self, request: HttpRequest, session_id=None):
         return SessionDetailApi.as_view()(request._request, session_id=session_id)
+
+    def update(self, request: HttpRequest, session_id=None):
+        return SessionUpdateApi.as_view()(request._request, session_id=session_id)
+
+    def partial_update(self, request: HttpRequest, session_id=None):
+        return SessionUpdateApi.as_view()(request._request, session_id=session_id)

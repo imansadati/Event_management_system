@@ -14,6 +14,8 @@ session_event_list = SessionEventGetwayApiViewSet.as_view({
 # sessions
 session_detail = SessionGetwayApiViewSet.as_view({
     'get': 'retrieve',
+    'put': 'update',
+    'patch': 'partial_update',
 })
 
 urlpatterns = [
