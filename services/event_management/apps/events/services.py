@@ -6,6 +6,7 @@ from .tasks import publsih_event_task
 from shared_utils.update_model import model_update
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
+from apps.organizer.models import OrganizerMember
 
 
 # * TODO: Must assign event speaker
@@ -31,6 +32,12 @@ def event_create(**kwargs):
             event.save(update_fields=['status', 'published_at'])
 
     return event
+
+
+@transaction.atomic()
+def set_organizer_member(event, user_id):
+    OrganizerMember.objects.create(
+        organizer=event.organizer, user_id=user_id, role='owner')
 
 
 def event_update(*, event: Event, data):
