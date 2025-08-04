@@ -124,9 +124,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "apps.authentication.jwt_authentication.CustomJWTAuthentication",
-    ),
+    # "DEFAULT_AUTHENTICATION_CLASSES": (
+    #     "apps.authentication.jwt_authentication.CustomJWTAuthentication",
+    # ),
     'DEFAULT_THROTTLE_CLASSES': [
         'apps.authentication.security.throttling.custom_throttling.RoleBasedRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',
