@@ -6,7 +6,8 @@ from .models import Event, EventCategory
 from .selectors import (event_list, event_get, event_category_list, event_category_get,
                         event_guest_list, guest_get_by_id_and_event, event_invite_list)
 from .services import (event_create, event_update, event_category_create,
-                       event_category_update, guest_create, invite_create)
+                       event_category_update, guest_create, invite_create,
+                       set_organizer_member)
 from shared_utils.pagination import get_paginated_response, LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework import status
@@ -14,6 +15,7 @@ from rest_framework.exceptions import ValidationError
 from apps.events.models import EventGuest, EventInvite
 from grpc_service.client.client import send_email_via_rpc
 from apps.organizer.apis import OrganizerListApi
+from shared_utils.permissions import IsAuthenticatedViaJWT, HasRolePermission
 
 
 class EventCategoryListApi(APIView):
@@ -223,6 +225,8 @@ class EventCreateApi(APIView):
 
         event = event_create(**serializer.validated_data)
 
+        set_organizer_member(event, reqeust.user.id)
+
         data = EventDetailApi.OutputEventSerializer(event).data
         return Response(data, status=status.HTTP_201_CREATED)
 
@@ -392,7 +396,6 @@ class EventInviteCreateApi(APIView):
             return Response({'detail': 'Invites are only for invite_only events.'}, status=status.HTTP_409_CONFLICT)
 
         default_exp = serializer.validated_data.get('expires_in_hours', 48)
-        print(default_exp)
         email = serializer.validated_data.get('email')
 
         invite, created = invite_create(
@@ -403,8 +406,6 @@ class EventInviteCreateApi(APIView):
             invite_url = 'test'
             send_email_via_rpc(invite.email, 'Invited to the event',
                                f'Click on this link to sign-up {invite_url}')
-            print(invite)
-            print(invite.expires_at)
 
         return Response(data={'detail': f'This {invite.email} email successfully sent invite for it.'}, status=status.HTTP_201_CREATED)
 
