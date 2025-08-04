@@ -35,7 +35,12 @@ class CustomJWTAuthentication(JWTAuthentication):
                     return user
                 raise AuthenticationFailed('User not found or inactive.')
 
-            # must implement for RemoteUser with grpc
+            elif hasattr(model, 'get_user'):
+                user = model.get_user(user_id)
+
+                if user:
+                    return user
+                raise AuthenticationFailed('Remote user not found.')
 
             else:
                 raise ImproperlyConfigured(
