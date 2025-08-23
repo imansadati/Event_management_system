@@ -15,7 +15,6 @@ from rest_framework.exceptions import ValidationError
 from apps.events.models import EventGuest, EventInvite
 from grpc_service.client.client import send_email_via_rpc
 from apps.organizer.apis import OrganizerListApi
-from shared_utils.permissions import IsAuthenticatedViaJWT, HasRolePermission
 
 
 class EventCategoryListApi(APIView):

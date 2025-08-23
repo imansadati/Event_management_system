@@ -34,17 +34,17 @@ class UserServiceViaRoleStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetUser = channel.unary_unary(
-                '/UserServiceViaRole/GetUser',
-                request_serializer=user__with__role__pb2.GetUserRequest.SerializeToString,
-                response_deserializer=user__with__role__pb2.GetUserResponse.FromString,
+        self.GetUserViaRole = channel.unary_unary(
+                '/UserServiceViaRole/GetUserViaRole',
+                request_serializer=user__with__role__pb2.GetUserViaRoleRequest.SerializeToString,
+                response_deserializer=user__with__role__pb2.GetUserViaRoleResponse.FromString,
                 _registered_method=True)
 
 
 class UserServiceViaRoleServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetUser(self, request, context):
+    def GetUserViaRole(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,10 +53,10 @@ class UserServiceViaRoleServicer(object):
 
 def add_UserServiceViaRoleServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetUser,
-                    request_deserializer=user__with__role__pb2.GetUserRequest.FromString,
-                    response_serializer=user__with__role__pb2.GetUserResponse.SerializeToString,
+            'GetUserViaRole': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUserViaRole,
+                    request_deserializer=user__with__role__pb2.GetUserViaRoleRequest.FromString,
+                    response_serializer=user__with__role__pb2.GetUserViaRoleResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -70,7 +70,7 @@ class UserServiceViaRole(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetUser(request,
+    def GetUserViaRole(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class UserServiceViaRole(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/UserServiceViaRole/GetUser',
-            user__with__role__pb2.GetUserRequest.SerializeToString,
-            user__with__role__pb2.GetUserResponse.FromString,
+            '/UserServiceViaRole/GetUserViaRole',
+            user__with__role__pb2.GetUserViaRoleRequest.SerializeToString,
+            user__with__role__pb2.GetUserViaRoleResponse.FromString,
             options,
             channel_credentials,
             insecure,

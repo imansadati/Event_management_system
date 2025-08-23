@@ -24,7 +24,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 THIRD_PARTY_APPS = [
     'rest_framework',
     'django_filters',
-    'rest_framework_simplejwt',
+    'rest_framework_simplejwt', 
 ]
 
 LOCAL_APPS = [
@@ -121,12 +121,17 @@ MEDIA_ROOT = '/app/media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+JWT_ROLE_MODEL_MAP = {
+    'attendee': ('users', 'AttendeeUser'),
+    'staff': ('users', 'StaffUser'),
+    'admin': ('users', 'AdminUser'),
+}
 
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
-    # "DEFAULT_AUTHENTICATION_CLASSES": (
-    #     "apps.authentication.jwt_authentication.CustomJWTAuthentication",
-    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'shared_utils.jwt_authentication.CustomJWTAuthentication',
+    ),
     'DEFAULT_THROTTLE_CLASSES': [
         'apps.authentication.security.throttling.custom_throttling.RoleBasedRateThrottle',
         'rest_framework.throttling.AnonRateThrottle',

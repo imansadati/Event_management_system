@@ -24,17 +24,17 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14user_with_role.proto\"\x1c\n\x0eGetUserRequest\x12\n\n\x02id\x18\x01 \x01(\t\":\n\x0fGetUserResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t2B\n\x12UserServiceViaRole\x12,\n\x07GetUser\x12\x0f.GetUserRequest\x1a\x10.GetUserResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x14user_with_role.proto\"1\n\x15GetUserViaRoleRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\"A\n\x16GetUserViaRoleResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04role\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t2W\n\x12UserServiceViaRole\x12\x41\n\x0eGetUserViaRole\x12\x16.GetUserViaRoleRequest\x1a\x17.GetUserViaRoleResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'user_with_role_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_GETUSERREQUEST']._serialized_start=24
-  _globals['_GETUSERREQUEST']._serialized_end=52
-  _globals['_GETUSERRESPONSE']._serialized_start=54
-  _globals['_GETUSERRESPONSE']._serialized_end=112
-  _globals['_USERSERVICEVIAROLE']._serialized_start=114
-  _globals['_USERSERVICEVIAROLE']._serialized_end=180
+  _globals['_GETUSERVIAROLEREQUEST']._serialized_start=24
+  _globals['_GETUSERVIAROLEREQUEST']._serialized_end=73
+  _globals['_GETUSERVIAROLERESPONSE']._serialized_start=75
+  _globals['_GETUSERVIAROLERESPONSE']._serialized_end=140
+  _globals['_USERSERVICEVIAROLE']._serialized_start=142
+  _globals['_USERSERVICEVIAROLE']._serialized_end=229
 # @@protoc_insertion_point(module_scope)
