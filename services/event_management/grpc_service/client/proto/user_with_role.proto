@@ -1,0 +1,17 @@
+syntax = 'proto3';
+
+
+service UserServiceViaRole {
+    rpc GetUserViaRole (GetUserViaRoleRequest) returns (GetUserViaRoleResponse);
+}
+
+message GetUserViaRoleRequest {
+    string id = 1;
+    string role = 2;
+}
+
+message GetUserViaRoleResponse {
+    string id = 1;
+    string role = 2;
+    string email = 3;
+}

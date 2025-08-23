@@ -1,9 +1,11 @@
 from pathlib import Path
 import os
+from grpc_service.client.client import RemoteUserClient
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-3+@#ueh!(#4xt-s39)2$oie61)5w^ck0f9_tdg7hfmu-_$qk7*'
+SECRET_KEY = 'django-insecure--_l+nk(-%chf(qz%e*rarg*a6$q-6*wdq+oo2zxo%_ljq2132z'
 
 
 DJANGO_ENV = os.getenv("DJANGO_ENV", "development").strip().lower()
@@ -22,6 +24,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(',')
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 LOCAL_APPS = [
@@ -119,8 +122,23 @@ MEDIA_ROOT = '/app/media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
+JWT_ROLE_MODEL_MAP = {
+    'attendee': RemoteUserClient,
+    'staff': RemoteUserClient,
+    'admin': RemoteUserClient,
+}
+
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'shared_utils.exception.exception_handler.custom_exception_handler',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'shared_utils.jwt_authentication.CustomJWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
 CELERY_BROKER_URL = os.environ.get(

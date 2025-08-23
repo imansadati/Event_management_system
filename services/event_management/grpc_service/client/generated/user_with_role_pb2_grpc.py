@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import user_pb2 as user__pb2
+from . import user_with_role_pb2 as user__with__role__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,14 +18,14 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in user_pb2_grpc.py depends on'
+        + f' but the generated code in user_with_role_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
     )
 
 
-class UserServiceStub(object):
+class UserServiceViaRoleStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -34,43 +34,43 @@ class UserServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetUser = channel.unary_unary(
-                '/UserService/GetUser',
-                request_serializer=user__pb2.GetUserRequest.SerializeToString,
-                response_deserializer=user__pb2.GetUserResponse.FromString,
+        self.GetUserViaRole = channel.unary_unary(
+                '/UserServiceViaRole/GetUserViaRole',
+                request_serializer=user__with__role__pb2.GetUserViaRoleRequest.SerializeToString,
+                response_deserializer=user__with__role__pb2.GetUserViaRoleResponse.FromString,
                 _registered_method=True)
 
 
-class UserServiceServicer(object):
+class UserServiceViaRoleServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetUser(self, request, context):
+    def GetUserViaRole(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_UserServiceServicer_to_server(servicer, server):
+def add_UserServiceViaRoleServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetUser': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetUser,
-                    request_deserializer=user__pb2.GetUserRequest.FromString,
-                    response_serializer=user__pb2.GetUserResponse.SerializeToString,
+            'GetUserViaRole': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetUserViaRole,
+                    request_deserializer=user__with__role__pb2.GetUserViaRoleRequest.FromString,
+                    response_serializer=user__with__role__pb2.GetUserViaRoleResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'UserService', rpc_method_handlers)
+            'UserServiceViaRole', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('UserService', rpc_method_handlers)
+    server.add_registered_method_handlers('UserServiceViaRole', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class UserService(object):
+class UserServiceViaRole(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetUser(request,
+    def GetUserViaRole(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class UserService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/UserService/GetUser',
-            user__pb2.GetUserRequest.SerializeToString,
-            user__pb2.GetUserResponse.FromString,
+            '/UserServiceViaRole/GetUserViaRole',
+            user__with__role__pb2.GetUserViaRoleRequest.SerializeToString,
+            user__with__role__pb2.GetUserViaRoleResponse.FromString,
             options,
             channel_credentials,
             insecure,
