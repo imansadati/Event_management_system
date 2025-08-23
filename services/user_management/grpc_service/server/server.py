@@ -1,13 +1,12 @@
-from grpc_service.server.generated.user_pb2_grpc import UserServiceServicer
-from grpc_service.server.generated.user_with_role_pb2_grpc import UserServiceViaRoleServicer
-from apps.users.models import AttendeeUser
 import grpc
-from grpc_service.server.generated import user_pb2
 from concurrent import futures
+from grpc_service.server.generated.user_pb2_grpc import UserServiceServicer
 from grpc_service.server.generated.user_pb2_grpc import add_UserServiceServicer_to_server
+from grpc_service.server.generated import user_pb2
+from grpc_service.server.generated.user_with_role_pb2_grpc import UserServiceViaRoleServicer
 from grpc_service.server.generated.user_with_role_pb2_grpc import add_UserServiceViaRoleServicer_to_server
-from apps.users.models import AdminUser, StaffUser, AttendeeUser
 from grpc_service.server.generated import user_with_role_pb2
+from apps.users.models import AdminUser, StaffUser, AttendeeUser
 
 
 ROLE_MODEL_MAP = {
@@ -33,9 +32,9 @@ class UserService(UserServiceServicer):
 
 
 class UserServiceViaRole(UserServiceViaRoleServicer):
-    def GetUser(self, request, context):
+    def GetUserViaRole(self, request, context):
         try:
-            user_id = request.user_id
+            user_id = request.id
             role = request.role
 
             if not role or role not in ROLE_MODEL_MAP:
@@ -48,7 +47,7 @@ class UserServiceViaRole(UserServiceViaRoleServicer):
             if not user:
                 context.abort(grpc.StatusCode.NOT_FOUND, 'User not found')
 
-            return user_with_role_pb2.GetUserResponse(
+            return user_with_role_pb2.GetUserViaRoleResponse(
                 id=str(user.id),
                 email=user.email,
                 role=role
